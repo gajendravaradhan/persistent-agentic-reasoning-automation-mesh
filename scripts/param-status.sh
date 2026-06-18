@@ -114,7 +114,7 @@ fi
 
 # 8. Cron
 echo -n "  Cron:         "
-CRON_COUNT=$($HOME/.hermes/hermes-agent/venv/bin/python $HOME/.hermes/hermes-agent/hermes_cli/main.py cron list 2>/dev/null | grep -cE "^[[:space:]]*[0-9]+\.|^[[:space:]]*[-*]" || true)
+CRON_COUNT=$($HOME/.hermes/hermes-agent/venv/bin/hermes cron list 2>/dev/null | grep -c '\[active\]' || true)
 if [ "$CRON_COUNT" -gt 0 ]; then
     echo -e "${GREEN}CONFIGURED ($CRON_COUNT job(s))${NC}"
 elif grep -q "^[[:space:]]*enabled: true" "$HOME/.hermes/config.yaml" 2>/dev/null; then
