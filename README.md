@@ -10,8 +10,8 @@ Autonomous orchestration layer fusing Oh-My-OpenCode and Hermes Agent.
 
 ```
                          ┌─────────────────────────┐
-                         │      WhatsApp / API      │
-                         │   (2-way message bridge)  │
+                         │     Telegram / API      │
+                         │   (2-way agent surface) │
                          └───────────┬─────────────┘
                                      │
                           ┌──────────▼──────────┐
@@ -31,7 +31,7 @@ Autonomous orchestration layer fusing Oh-My-OpenCode and Hermes Agent.
               └─────────────────┘   └───────────────────┘
 ```
 
-PARAM sits between messaging surfaces and agent runtimes, routing requests through a self-evolving memory layer and a proactive cron scheduler. Both Oh-My-OpenCode and Hermes Agent expose their full MCP tool surfaces to the mesh.
+PARAM sits between user-facing chat/API surfaces and agent runtimes, routing requests through a self-evolving memory layer and a proactive cron scheduler. Both Oh-My-OpenCode and Hermes Agent expose their full MCP tool surfaces to the mesh.
 
 ---
 
@@ -39,18 +39,17 @@ PARAM sits between messaging surfaces and agent runtimes, routing requests throu
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/param.git
-cd param
+git clone https://github.com/gajendravaradhan/persistent-agentic-reasoning-automation-mesh.git
+cd persistent-agentic-reasoning-automation-mesh
 
-# Install dependencies
-bun install                     # or: npm install
+# Configure Hermes/PARAM
+cp configs/hermes-env.tmpl ~/.hermes/.env
+chmod 600 ~/.hermes/.env
+# Add TELEGRAM_BOT_TOKEN from @BotFather and TELEGRAM_ALLOWED_USERS.
+# Provider routing is in configs/hermes-config.yaml.tmpl; default routes via TokenEye/OpenCode Go.
 
-# Configure your environment
-cp .env.example .env
-# Edit .env with your WhatsApp credentials, Hermes endpoint, and OpenCode config
-
-# Launch PARAM
-bun run src/index.ts
+# Check status
+./scripts/param-status.sh
 ```
 
 PARAM requires a running Hermes Agent instance and an Oh-My-OpenCode session. See [specs/](specs/) for detailed setup guides.
@@ -61,7 +60,8 @@ PARAM requires a running Hermes Agent instance and an Oh-My-OpenCode session. Se
 
 | Feature | Description |
 |---------|-------------|
-| **2-way WhatsApp bridge** | Send and receive messages via WhatsApp. PARAM can be triggered by text, respond in threads, and push proactive notifications. |
+| **2-way Telegram bridge** | Send and receive messages through a dedicated Telegram bot. PARAM can be triggered by DM, respond directly, and push proactive notifications. |
+| **Generic provider routing** | Configure any Hermes provider or OpenAI-compatible proxy in `model.*`. Default template routes through TokenEye/OpenCode Go so token usage is sniffed and recorded. |
 | **Self-evolving memory** | Interactions are indexed and stored. The memory engine surfaces relevant context from past exchanges automatically. |
 | **Proactive cron** | Scheduled tasks fire on configurable intervals. PARAM checks conditions, runs actions, and reports results without being asked. |
 | **Full MCP tool surface** | All Model Context Protocol tools from both Oh-My-OpenCode and Hermes Agent are available through a unified router. |
@@ -71,54 +71,26 @@ PARAM requires a running Hermes Agent instance and an Oh-My-OpenCode session. Se
 
 ## Requirements
 
-- **Runtime**: [Bun](https://bun.sh) (>= 1.0) or Node.js (>= 20)
-- **Python**: 3.11+ (for Hermes Agent integration)
+- **Python**: 3.11+ for Hermes Agent integration
 - **Hermes Agent**: running instance with MCP server enabled
 - **Oh-My-OpenCode**: configured with your API keys and MCP tools
-- **OS**: macOS (primary target; Linux works with minor adjustments)
+- **Telegram Bot**: token from @BotFather for the primary chat surface
+- **OS**: macOS primary; Linux supported for unattended runtime
 
 ---
 
 ## Project Structure
 
 ```
-param/
-├── README.md
-├── .gitignore
-├── .env.example
-├── package.json
-├── bun.lockb
-├── src/
-│   ├── index.ts              # Entry point
-│   ├── core/
-│   │   ├── memory.ts         # Memory engine
-│   │   ├── scheduler.ts      # Cron / proactive triggers
-│   │   └── router.ts         # Intent-based agent routing
-│   ├── bridges/
-│   │   ├── whatsapp.ts       # WhatsApp message bridge
-│   │   └── api.ts            # HTTP API surface
-│   ├── agents/
-│   │   ├── opencode.ts       # Oh-My-OpenCode integration
-│   │   └── hermes.ts         # Hermes Agent integration
-│   └── mcp/
-│       └── unified.ts        # Unified MCP tool surface
-├── commands/
-│   ├── exit-param.md         # /exit-param slash command
-│   └── ...                   # Additional slash commands
-├── configs/
-│   └── default.json          # Default configuration
-├── specs/
-│   ├── architecture.md       # Architecture deep dive
-│   ├── memory-engine.md      # Self-evolving memory design
-│   ├── scheduler.md          # Cron scheduler spec
-│   ├── whatsapp-bridge.md    # WhatsApp integration docs
-│   └── mcp-surface.md        # MCP tool surface specification
-├── scripts/
-│   ├── setup.sh              # Environment setup script
-│   └── dev.sh                # Development launcher
-└── tests/
-    ├── unit/
-    └── integration/
+persistent-agentic-reasoning-automation-mesh/
+├── AGENTS.md                  # PARAM session behavior
+├── SOUL.md                    # PARAM/Jarvis persona
+├── param_hermes_mcp.py        # Hermes MCP bridge
+├── commands/                  # Slash commands
+├── configs/                   # Environment/config templates
+├── scripts/                   # Setup and status checks
+├── specs/                     # Architecture and operations docs
+└── tests/                     # MCP bridge tests
 ```
 
 ---
@@ -127,11 +99,9 @@ param/
 
 Detailed specifications live in the [specs/](specs/) directory:
 
-- [Architecture](specs/architecture.md) — system design, data flow, component interactions
-- [Memory Engine](specs/memory-engine.md) — vector indexing, context retrieval, evolution loop
-- [Scheduler](specs/scheduler.md) — cron syntax, task definitions, proactive triggers
-- [WhatsApp Bridge](specs/whatsapp-bridge.md) — message format, session management, retry logic
-- [MCP Surface](specs/mcp-surface.md) — unified tool catalog, routing rules, auth model
+- [Architecture](specs/ARCHITECTURE.md) — system design, data flow, component interactions
+- [Extensions](specs/EXTENSIONS.md) — MCP and future integration model
+- [Troubleshooting](specs/TROUBLESHOOTING.md) — operational checks and fixes
 
 ---
 

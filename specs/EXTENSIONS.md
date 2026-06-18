@@ -13,7 +13,7 @@ Extensibility is built on three layers:
 | Layer | Role | Example |
 |-------|------|---------|
 | **OMO** (OhMyOpenCode) | Agent runtime, tool discovery, task delegation | Multi-agent orchestration, code execution |
-| **Hermes** | Persistent-world interface, personal automation | WhatsApp, cron, notifications, state |
+| **Hermes** | Persistent-world interface, personal automation | Telegram, cron, notifications, state |
 | **MCP plugins** | Any future integration | Slack, email, Jira, HomeKit |
 
 New integrations arrive as MCP servers. OMO discovers their tools automatically. PARAM absorbs them without identity drift.
@@ -53,7 +53,7 @@ Examples from the running mesh:
 
 | Tool | Source |
 |------|--------|
-| `hermes__messages_read` | Hermes WhatsApp bridge |
+| `hermes__messages_read` | Hermes Telegram bridge |
 | `hermes__cron_status` | Hermes cron scheduler |
 | `hermes__state_set` | Hermes persistent state |
 | `mcp__huly__create_issue` | Huly project tracker |
@@ -348,7 +348,7 @@ A new integration could be anything:
 
 | Integration | Prefix | Status | Purpose |
 |-------------|--------|--------|---------|
-| Hermes | `hermes__*` | Active | WhatsApp, cron, notifications, state |
+| Hermes | `hermes__*` | Active | Telegram, cron, notifications, state |
 | Huly | `mcp__huly__*` | Active | Project tracking, issues, documentation |
 | Slack | `mcp__slack__*` | Active | Team messaging, alert delivery |
 

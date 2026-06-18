@@ -6,7 +6,7 @@ Common issues, diagnostic commands, and their fixes.
 
 ## 1. Hermes Tools Not Showing Up
 
-**Symptom:** `hermes__*` tools are missing from OMO's tool list. PARAM cannot check WhatsApp, run cron jobs, or access persistent state.
+**Symptom:** `hermes__*` tools are missing from OMO's tool list. PARAM cannot check Telegram, run cron jobs, or access persistent state.
 
 ### Check the MCP Config
 
@@ -87,51 +87,37 @@ OMO reads `~/.mcp.json` at startup. Restart your OMO session after fixing config
 
 ---
 
-## 2. WhatsApp Not Connecting
+## 2. Telegram Not Connecting
 
-**Symptom:** `hermes__messages_read` returns errors or no messages. WhatsApp bridge is offline.
+**Symptom:** PARAM does not respond to Telegram bot messages.
 
-### Check Gateway Status
+### Checks
 
-Hermes uses Baileys (WhatsApp Web protocol) under the hood. Check if the gateway is running:
+1. Confirm `TELEGRAM_BOT_TOKEN` is set in `~/.hermes/.env`.
+2. Confirm `TELEGRAM_ALLOWED_USERS` contains your numeric Telegram user ID.
+3. Restart the Hermes gateway:
 
 ```bash
-# Check if hermes-agent process is running
-ps aux | grep hermes
+~/.hermes/hermes-agent/venv/bin/hermes gateway stop
+~/.hermes/hermes-agent/venv/bin/hermes gateway run --accept-hooks
 ```
 
-### QR Code Authentication
+4. DM the Telegram bot directly. Group messages may require mention settings.
+5. Check logs:
 
-On first run or after session expiry, Hermes needs a fresh QR scan:
-
-1. Check `~/.hermes/logs/` for QR-related messages
-2. If prompted, scan the QR code with WhatsApp on your phone (Linked Devices)
-3. The session file is stored at `~/.hermes/sessions/`
-
-### Auth Info Issues
-
-Check the auth state:
 ```bash
-ls -la ~/.hermes/pairing/
-ls -la ~/.hermes/sessions/
+rg -n "telegram|error|unauthorized" ~/.hermes/logs/gateway.log
 ```
 
-If session files are missing or corrupted:
-1. Delete `~/.hermes/sessions/` and `~/.hermes/pairing/`
-2. Restart Hermes to trigger a fresh QR code
-3. Re-scan from WhatsApp mobile app
+### Common Telegram Problems
 
-### Common WhatsApp Problems
+| Problem | Fix |
+|---------|-----|
+| Bot does not answer | Start the bot with `/start`, then send a message. |
+| Unauthorized user | Add your numeric Telegram ID to `TELEGRAM_ALLOWED_USERS`. |
+| Cron has no target | Set `TELEGRAM_HOME_CHANNEL` to your chat ID after first contact. |
+| Token rejected | Regenerate token with @BotFather and update `.env`. |
 
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| "Not connected" | Gateway process died | Restart Hermes agent |
-| QR code not appearing | Session files corrupted | Clear sessions/ and pairing/ |
-| Messages not sending | Rate limit or connection drop | Wait, retry. Check `~/.hermes/logs/` |
-| "auth_info is missing" | First-time setup incomplete | Run initial pairing flow |
-| Connection keeps dropping | Network instability or IP change | Restart Hermes agent |
-
----
 
 ## 3. PARAM Identity Not Loading
 
@@ -478,7 +464,7 @@ python3 -c "import yaml; yaml.safe_load(open('/Users/gajendra/.hermes/config.yam
 |-----------|-------------|-------|
 | Hermes MCP server | stderr → OMO session | Not persisted as a file by default |
 | Hermes agent | `~/.hermes/logs/` | Various log files |
-| WhatsApp gateway | `~/.hermes/logs/` | Connection logs, QR events |
+| Telegram gateway | `~/.hermes/logs/` | Connection logs, bot token events |
 | Cron scheduler | `~/.hermes/logs/` | Task execution logs |
 | OMO session | In-session only | Tool call results, errors |
 | TokenEye | Depends on config | Usually stdout or a log file |
@@ -521,7 +507,7 @@ If none of the above resolves your issue:
 2. **Check logs** (section 9) for the past hour
 3. **Reproduce the issue** with the MCP server running manually in a terminal so you can see real-time error output
 4. **Check recent changes**: `git log --oneline -10` in the PARAM project repo
-5. **Verify external services**: Is WhatsApp Web up? Is the network stable? Are API tokens still valid?
+5. **Verify external services**: Is Telegram Bot API up? Is the network stable? Are API tokens still valid?
 
 Most issues trace back to one of:
 - Missing Python dependency in the venv

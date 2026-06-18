@@ -13,7 +13,7 @@ The system lives at [github.com/gajendravaradhan/persistent-agentic-reasoning-au
 ```mermaid
 graph TB
     subgraph User["User Interaction"]
-        WA[WhatsApp]
+        TG[Telegram]
         OMO_UI[OpenCode Session]
     end
 
@@ -34,7 +34,7 @@ graph TB
 
     subgraph HERMES["Hermes Layer — Personal Automation"]
         direction TB
-        HERMES_TOOLS[Hermes Tools<br/>WhatsApp / Cron / Notify / State]
+        HERMES_TOOLS[Hermes Tools<br/>Telegram / Cron / Notify / State]
         HERMES_REG[Tool Registry]
     end
 
@@ -85,7 +85,7 @@ The Identity Layer is the defining architectural decision of PARAM. It separates
 On every session load, the startup protocol executes in order:
 1. Load and adopt persona from `SOUL.md`
 2. Adopt operational constraints from `AGENTS.md`
-3. Enforce the **Identity Dissociation Hard Block**: PARAM may never identify as any OMO sub-component (Sisyphus, Hephaestus, Oracle, Prometheus, Metis, Momus, Atlas) or use the term "ASO"
+3. Enforce the **Identity Dissociation Hard Block**: PARAM may never identify as any OMO sub-component (Sisyphus, Hephaestus, Oracle, Prometheus, Metis, Momus, Atlas) or use legacy project names
 
 This dual-file design means personality (SOUL.md) and mechanics (AGENTS.md) evolve independently. Adding a new integration never requires rewriting the persona.
 
@@ -105,7 +105,7 @@ The Hermes Layer provides persistent-world connectivity:
 
 | Domain | Tools | Purpose |
 |--------|-------|---------|
-| WhatsApp | `messages_read`, `messages_send`, `contacts_*` | Two-way message bridge to WhatsApp |
+| Telegram | `messages_read`, `messages_send`, `contacts_*` | Two-way message bridge to Telegram |
 | Cron/Scheduling | `cron_status`, `cron_trigger` | Scheduled task execution and monitoring |
 | Notifications | `notify_send`, `notify_status` | System notification delivery |
 | State | `state_get`, `state_set`, `state_clear` | Persistent key-value state store |
@@ -151,18 +151,18 @@ PARAM maintains state across sessions through Hermes's state store (`state_get`,
 - User preferences and learned patterns
 - Active session metadata
 - Cron job definitions and last-run timestamps
-- Communication context (recent WhatsApp threads)
+- Communication context (recent Telegram threads)
 
 State is isolated to the local machine. No state leaves the workspace. The memory engine does not share data between users.
 
-### WhatsApp Bridge
+### Telegram Bridge
 
-The WhatsApp bridge enables two-way communication:
+The Telegram bridge enables two-way communication:
 
 - **Inbound**: PARAM reads unread messages via `messages_read` during session startup and periodically via cron. Messages are parsed for intent and routed to appropriate agents.
 - **Outbound**: PARAM sends messages via `messages_send`, including proactive notifications from scheduled tasks, tool execution results, and user-requested communications.
 
-The bridge operates through the Hermes tools exposed via `hermes__messages_read` and `hermes__messages_send`. All WhatsApp credentials are stored in `.env`, never in code or configuration files.
+The bridge operates through the Hermes tools exposed via `hermes__messages_read` and `hermes__messages_send`. All Telegram credentials are stored in `.env`, never in code or configuration files.
 
 ---
 
@@ -190,25 +190,25 @@ sequenceDiagram
     HERMES-->>SESSION: [pending cron jobs]
 
     SESSION->>HERMES: messages_read()
-    HERMES-->>SESSION: [unread WhatsApp messages]
+    HERMES-->>SESSION: [unread Telegram messages]
 
     SESSION-->>USER: Offer next actions based on context
 ```
 
 **Figure 3: Session startup sequence. Identity is loaded before any tool access. Hermes checks happen after identity is established.**
 
-### WhatsApp Message Flow
+### Telegram Message Flow
 
 ```mermaid
 sequenceDiagram
-    participant WA as WhatsApp
+    participant TG as Telegram
     participant HERMES as Hermes Layer
     participant MCP as MCP Bridge
     participant PARAM as PARAM Core
     participant OMO as OMO Agent
     participant USER as User
 
-    WA->>HERMES: Incoming message
+    TG->>HERMES: Incoming message
     PARAM->>MCP: messages_read()
     MCP->>HERMES: dispatch
     HERMES-->>PARAM: [messages]
@@ -230,7 +230,7 @@ sequenceDiagram
     end
 ```
 
-**Figure 4: End-to-end WhatsApp message processing. Intent classification determines whether a task is handled directly or delegated to an OMO agent.**
+**Figure 4: End-to-end Telegram message processing. Intent classification determines whether a task is handled directly or delegated to an OMO agent.**
 
 ### Tool Execution Flow
 
@@ -367,7 +367,7 @@ PARAM never exits unprompted. Idle readiness is the default operating state.
 
 The hard block in AGENTS.md prevents PARAM from ever:
 - Identifying as any OMO sub-component (Sisyphus, Hephaestus, Oracle, Prometheus, Metis, Momus, Atlas)
-- Using the term "ASO"
+- Using legacy project names
 - Self-referencing as "an AI assistant" or "a language model"
 
 This is not cosmetic. It preserves PARAM's identity as a unified reasoning mesh regardless of which subsystems are active at any moment. The user interacts with *one* identity, not a committee.
@@ -444,7 +444,7 @@ PARAM operates **entirely locally**. All code executes on the user's machine. No
 | Secret Type | Storage | Protection |
 |-------------|---------|------------|
 | API keys | `.env` file | Git-ignored via `.gitignore`; never hardcoded |
-| WhatsApp credentials | `.env` file | Same as above |
+| Telegram credentials | `.env` file | Same as above |
 | Hermes configuration | `auth_info/` directory | Git-ignored; local-only |
 | State data | Hermes state store | Local filesystem; per-machine |
 
@@ -494,7 +494,7 @@ The README references a planned source layout for a TypeScript runtime core. The
 | `src/core/memory.ts` | Self-evolving memory engine |
 | `src/core/scheduler.ts` | Cron / proactive triggers |
 | `src/core/router.ts` | Intent-based agent routing |
-| `src/bridges/whatsapp.ts` | WhatsApp message bridge |
+| `Hermes Telegram gateway adapter` | Telegram message bridge |
 | `src/bridges/api.ts` | HTTP API surface |
 | `src/agents/opencode.ts` | OMO integration |
 | `src/agents/hermes.ts` | Hermes integration |
