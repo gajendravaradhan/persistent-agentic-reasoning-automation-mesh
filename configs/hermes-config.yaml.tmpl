@@ -7,25 +7,35 @@
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# Model — AI LLM settings
+# Model — provider/proxy routing
 # ---------------------------------------------------------------------------
+# This is intentionally generic. Users can route PARAM through any Hermes
+# provider or OpenAI-compatible proxy by changing provider/default/base_url.
+#
+# TokenEye default:
+#   provider: opencode-go
+#   default: kimi-k2.6
+#   base_url: http://127.0.0.1:8787/zen/go/v1
+#   env: OPENCODE_GO_API_KEY=managed-by-tokeneye
+#
+# Direct provider examples:
+#   provider: openrouter   default: anthropic/claude-sonnet-4-6
+#   provider: anthropic    default: claude-sonnet-4-6
+#   provider: custom       default: your-model-id  base_url: http://localhost:11434/v1
 model:
-  # Primary provider: anthropic | openai | ollama
-  provider: anthropic
+  provider: opencode-go
+  default: kimi-k2.6
+  base_url: http://127.0.0.1:8787/zen/go/v1
 
-  # Model IDs per provider. Override via env vars.
-  anthropic_model: claude-sonnet-4-20250514
-  openai_model: gpt-4o
-  # ollama_model: llama3.1:70b
+  # TokenEye/opencode.ai currently rejects some SDK/browser signatures. Keep
+  # headers configurable so any proxy/provider can receive an acceptable client
+  # signature without code changes.
+  default_headers:
+    User-Agent: curl/8.7.1
+    Accept: application/json
 
-  # Maximum tokens for a single generation.
-  max_tokens: 8192
-
-  # Temperature (0.0 to 1.0). Lower = more deterministic.
-  temperature: 0.3
-
-  # System prompt override (optional). Hermes ships a default PARAM system prompt.
-  # system_prompt_path: /Users/$USER/.hermes/prompts/system.txt
+  # Optional output cap. Leave unset to use provider default.
+  # max_tokens: 8192
 
 # ---------------------------------------------------------------------------
 # Agent — PARAM identity and behavior
@@ -150,10 +160,10 @@ gateway:
     enabled: true
     path: /health
 
-  # WhatsApp webhook endpoint (receives incoming messages from Twilio).
-  whatsapp_webhook:
+  # Telegram webhook endpoint (receives incoming Telegram webhook messages).
+  telegram_webhook:
     enabled: false
-    path: /whatsapp/webhook
+    path: /telegram/webhook
 
 # ---------------------------------------------------------------------------
 # Skills — Hermes skill definitions
@@ -166,7 +176,7 @@ skills:
   # Auto-load these skills on startup.
   auto_load:
     - system-status
-    - whatsapp-messenger
+    - telegram-messenger
     - cron-scheduler
 
 # ---------------------------------------------------------------------------

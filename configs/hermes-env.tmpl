@@ -8,60 +8,42 @@
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# LLM Providers
+# Model Provider Routing
 # ---------------------------------------------------------------------------
-# Which provider Hermes uses for AI reasoning and generation.
-# Supported: anthropic, openai, ollama (local)
-HERMES_LLM_PROVIDER=anthropic
+# PARAM should route model traffic through an observability proxy when one is
+# available. TokenEye is the default local proxy because it can manage provider
+# keys and record token usage/costs without exposing secrets to PARAM.
+#
+# Configure the provider/model in ~/.hermes/config.yaml under model.*.
+# Keep credentials here. For TokenEye-managed providers, use the provider's
+# expected key env var with the marker value "managed-by-tokeneye".
 
-# --- Anthropic (Claude) ---
-# Recommended: route through TokenEye proxy for unified billing and rate limits.
-# TokenEye gives you a single key that proxies to Anthropic/OpenAI/others.
-# If not using TokenEye, set ANTHROPIC_API_KEY directly instead.
-ANTHROPIC_BASE_URL=https://api.tokeneye.io/v1/anthropic
-ANTHROPIC_API_KEY=sk-tokeneve-your-key-here
+# Recommended default: OpenCode Go via local TokenEye proxy.
+OPENCODE_GO_API_KEY=managed-by-tokeneye
+OPENCODE_GO_BASE_URL=http://127.0.0.1:8787/zen/go/v1
 
-# Default model. Claude Sonnet 4 is the recommended daily driver for PARAM.
-# Other options: claude-haiku-4-20250514 (fast/cheap), claude-opus-4-20250514 (deep reasoning)
-ANTHROPIC_MODEL=claude-sonnet-4-20250514
-
-# --- OpenAI (fallback / specific tasks) ---
-# Set if HERMES_LLM_PROVIDER=openai or if some skills route to OpenAI.
-OPENAI_BASE_URL=https://api.tokeneeye.io/v1/openai
-OPENAI_API_KEY=sk-tokeneve-your-key-here
-OPENAI_MODEL=gpt-4o
-
-# --- Ollama (local, no API key needed) ---
-# Set HERMES_LLM_PROVIDER=ollama to run models locally.
-# OLLAMA_BASE_URL=http://localhost:11434
-# OLLAMA_MODEL=llama3.1:70b
+# Other examples. Uncomment only the provider you route through.
+# OPENROUTER_API_KEY=...
+# OPENAI_API_KEY=...
+# ANTHROPIC_API_KEY=...
+# GOOGLE_API_KEY=...
+# GEMINI_API_KEY=...
+# KIMI_API_KEY=...
 
 # ---------------------------------------------------------------------------
-# Messaging — WhatsApp Gateway
+# Messaging — Telegram Gateway
 # ---------------------------------------------------------------------------
-# Hermes can send and receive WhatsApp messages via Twilio.
-# Also supports baileys (WhatsApp Web) as a free alternative.
+# PARAM uses Telegram as the primary two-way chat surface.
+# Create a bot with @BotFather, then paste the token here.
 
-# Enable WhatsApp integration.
-WHATSAPP_ENABLED=false
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_ALLOWED_USERS=
+TELEGRAM_HOME_CHANNEL=
+TELEGRAM_HOME_CHANNEL_NAME=PARAM
 
-# Mode: "twilio" (Business API) or "baileys" (WhatsApp Web library).
-WHATSAPP_MODE=twilio
-
-# --- Twilio (when WHATSAPP_MODE=twilio) ---
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-# Your personal WhatsApp number that Hermes messages.
-TWILIO_WHATSAPP_TO=whatsapp:+1xxxxxxxxxx
-
-# Webhook endpoint for incoming messages (set in Twilio console).
-TWILIO_WEBHOOK_URL=https://your-domain.com/hermes/whatsapp/webhook
-
-# --- baileys (when WHATSAPP_MODE=baileys) ---
-# No API keys needed. Hermes pairs via QR code on first run.
-# BAILETS_AUTH_DIR=/Users/$USER/.hermes/baileys-auth
-# BAILETS_QR_TIMEOUT=120
+# Optional webhook mode for cloud deployments. Leave unset for long polling.
+# TELEGRAM_WEBHOOK_URL=https://your-domain.com/telegram
+# TELEGRAM_WEBHOOK_SECRET=
 
 # ---------------------------------------------------------------------------
 # Memory — Long-term Persistence
