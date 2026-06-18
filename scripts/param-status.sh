@@ -11,6 +11,10 @@ echo -e "${BOLD}PARAM Status Dashboard${NC}"
 echo "======================"
 echo ""
 
+env_value() {
+    grep -E "^$1=" "$HOME/.hermes/.env" 2>/dev/null | tail -n1 | cut -d= -f2- | sed "s/[[:space:]]*#.*$//" | xargs
+}
+
 # 1. Hermes Agent
 echo -n "  Hermes Agent: "
 if [ -d "$HOME/.hermes/hermes-agent" ]; then
@@ -40,15 +44,38 @@ else
     echo -e "${RED}DOWN${NC}"
 fi
 
-# 4. WhatsApp
-echo -n "  WhatsApp:     "
-if [ -f "$HOME/.hermes/platforms/whatsapp/session/creds.json" ]; then
-    echo -e "${GREEN}PAIRED${NC}"
+# 4. Model provider
+echo -n "  Model route:  "
+MODEL_INFO=$($HOME/.hermes/hermes-agent/venv/bin/python - <<'PY' 2>/dev/null
+from pathlib import Path
+import yaml
+cfg = yaml.safe_load(Path.home().joinpath('.hermes/config.yaml').read_text())
+model = cfg.get('model', {})
+provider = model.get('provider') or 'auto'
+default = model.get('default') or model.get('model') or 'unset'
+base = model.get('base_url') or ''
+print(f"{provider}:{default}" + (" via " + base if base else ""))
+PY
+)
+if [ -n "$MODEL_INFO" ]; then
+    echo -e "${GREEN}$MODEL_INFO${NC}"
 else
-    echo -e "${YELLOW}NOT PAIRED — run: python ~/.hermes/hermes-agent/hermes_cli/main.py whatsapp${NC}"
+    echo -e "${YELLOW}UNKNOWN${NC}"
 fi
 
-# 5. Memory
+# 5. Telegram
+echo -n "  Telegram:    "
+if [ -n "$(env_value TELEGRAM_BOT_TOKEN)" ]; then
+    if [ -n "$(env_value TELEGRAM_ALLOWED_USERS)" ]; then
+        echo -e "${GREEN}CONFIGURED${NC}"
+    else
+        echo -e "${YELLOW}TOKEN SET — add TELEGRAM_ALLOWED_USERS${NC}"
+    fi
+else
+    echo -e "${YELLOW}NO BOT TOKEN — create bot with @BotFather${NC}"
+fi
+
+# 6. Memory
 echo -n "  Memory seeds: "
 if [ -f "$HOME/.hermes/memories/MEMORY.md" ] && [ -f "$HOME/.hermes/memories/USER.md" ]; then
     echo -e "${GREEN}SEEDED${NC}"
@@ -57,20 +84,20 @@ else
 fi
 
 echo -n "  Honcho:       "
-if grep -q "HONCHO_API_KEY=" "$HOME/.hermes/.env" 2>/dev/null && ! grep -q "^#.*HONCHO_API_KEY" "$HOME/.hermes/.env" 2>/dev/null; then
+if [ -n "$(env_value HONCHO_API_KEY)" ]; then
     echo -e "${GREEN}CONFIGURED${NC}"
 else
     echo -e "${YELLOW}NO API KEY${NC}"
 fi
 
 echo -n "  Mem0:         "
-if grep -q "MEM0_API_KEY=" "$HOME/.hermes/.env" 2>/dev/null && ! grep -q "^#.*MEM0_API_KEY" "$HOME/.hermes/.env" 2>/dev/null; then
+if [ -n "$(env_value MEM0_API_KEY)" ]; then
     echo -e "${GREEN}CONFIGURED${NC}"
 else
     echo -e "${YELLOW}NO API KEY${NC}"
 fi
 
-# 6. Identity
+# 7. Identity
 echo -n "  AGENTS.md:    "
 if [ -f "$HOME/.config/opencode/AGENTS.md" ]; then
     echo -e "${GREEN}DEPLOYED ($(wc -l < $HOME/.config/opencode/AGENTS.md | tr -d ' ') lines)${NC}"
@@ -85,10 +112,13 @@ else
     echo -e "${RED}MISSING${NC}"
 fi
 
-# 7. Cron
+# 8. Cron
 echo -n "  Cron:         "
-if grep -q "enabled: true" "$HOME/.hermes/config.yaml" 2>/dev/null; then
-    echo -e "${YELLOW}CONFIGURED (no jobs enabled yet)${NC}"
+CRON_COUNT=$($HOME/.hermes/hermes-agent/venv/bin/python $HOME/.hermes/hermes-agent/hermes_cli/main.py cron list 2>/dev/null | grep -cE "^[[:space:]]*[0-9]+\.|^[[:space:]]*[-*]" || true)
+if [ "$CRON_COUNT" -gt 0 ]; then
+    echo -e "${GREEN}CONFIGURED ($CRON_COUNT job(s))${NC}"
+elif grep -q "^[[:space:]]*enabled: true" "$HOME/.hermes/config.yaml" 2>/dev/null; then
+    echo -e "${YELLOW}ENABLED (no jobs created yet)${NC}"
 else
     echo -e "${YELLOW}NOT CONFIGURED${NC}"
 fi

@@ -30,6 +30,9 @@ RESULTS=()
 record_ok()   { RESULTS+=("${GREEN}✓${NC} $1"); }
 record_todo() { RESULTS+=("${YELLOW}⚠${NC} $1"); }
 record_err()  { RESULTS+=("${RED}✗${NC} $1"); }
+env_value() {
+    grep -E "^$1=" "$ENV_FILE" 2>/dev/null | tail -n1 | cut -d= -f2- | sed "s/[[:space:]]*#.*$//" | xargs
+}
 
 clear
 printf "${CYAN}${BOLD}"
@@ -91,29 +94,28 @@ else
 fi
 
 # =============================================================================
-# Step 3 — WhatsApp Status
+# Step 3 — Telegram Status
 # =============================================================================
-header "[3/8] WhatsApp Integration"
+header "[3/8] Telegram Integration"
 
-WHATSAPP_ENABLED=$(grep -E '^WHATSAPP_ENABLED=' "$ENV_FILE" 2>/dev/null | cut -d= -f2 || echo "false")
+TELEGRAM_TOKEN=$(env_value TELEGRAM_BOT_TOKEN)
+TELEGRAM_USERS=$(env_value TELEGRAM_ALLOWED_USERS)
 
-if [ "$WHATSAPP_ENABLED" = "true" ]; then
-    ok_msg "WhatsApp is enabled in .env"
-    
-    # Check if paired (look for pairing state files)
-    if [ -d "$HERMES_DIR/pairing" ] && [ "$(ls -A "$HERMES_DIR/pairing" 2>/dev/null)" ]; then
-        ok_msg "WhatsApp pairing data found"
-        record_ok "WhatsApp paired"
+if [ -n "$TELEGRAM_TOKEN" ]; then
+    ok_msg "Telegram bot token is configured"
+    if [ -n "$TELEGRAM_USERS" ]; then
+        ok_msg "Telegram allowed users configured"
+        record_ok "Telegram configured"
     else
-        todo_msg "WhatsApp enabled but not paired. Run pairing command:"
-        echo "  python $HERMES_AGENT/hermes_cli/main.py whatsapp"
-        record_todo "Pair WhatsApp"
+        todo_msg "Set TELEGRAM_ALLOWED_USERS to your Telegram numeric user ID"
+        echo "  Message @userinfobot on Telegram to find your ID."
+        record_todo "Configure Telegram allowed users"
     fi
 else
-    todo_msg "WhatsApp not enabled. Set WHATSAPP_ENABLED=true in .env"
-    echo "  Or skip if you don't need WhatsApp."
-    echo "  To enable, see: $PARAM_DIR/configs/whatsapp-config.md"
-    record_todo "Enable WhatsApp (optional)"
+    todo_msg "Telegram bot token missing. Create a bot with @BotFather."
+    echo "  Set TELEGRAM_BOT_TOKEN in $ENV_FILE"
+    echo "  Set TELEGRAM_ALLOWED_USERS to your Telegram numeric user ID"
+    record_todo "Configure Telegram bot"
 fi
 
 # =============================================================================
@@ -121,16 +123,16 @@ fi
 # =============================================================================
 header "[4/8] Memory Providers"
 
-HONCHO_ID=$(grep -E '^HONCHO_APP_ID=' "$ENV_FILE" 2>/dev/null | cut -d= -f2 || echo "")
-MEM0_KEY=$(grep -E '^MEM0_API_KEY=' "$ENV_FILE" 2>/dev/null | cut -d= -f2 || echo "")
+HONCHO_KEY=$(env_value HONCHO_API_KEY)
+MEM0_KEY=$(env_value MEM0_API_KEY)
 
-if [ -n "$HONCHO_ID" ] && [ "$HONCHO_ID" != "your-honcho-app-id" ]; then
-    ok_msg "Honcho configured (APP_ID: $HONCHO_ID)"
+if [ -n "$HONCHO_KEY" ]; then
+    ok_msg "Honcho configured (API key present)"
     record_ok "Honcho memory configured"
 else
-    todo_msg "Honcho not configured. Get APP_ID from https://honcho.dev/dashboard"
-    echo "  Set HONCHO_APP_ID in $ENV_FILE"
-    record_todo "Configure Honcho APP_ID"
+    todo_msg "Honcho not configured. Get API key from https://app.honcho.dev"
+    echo "  Set HONCHO_API_KEY in $ENV_FILE"
+    record_todo "Configure Honcho API key"
 fi
 
 if [ -n "$MEM0_KEY" ] && [ "$MEM0_KEY" != "m0-your-mem0-api-key" ]; then
@@ -147,20 +149,22 @@ fi
 # =============================================================================
 header "[5/8] Cron Scheduler"
 
-CRON_ENABLED=$(grep -E '^CRON_ENABLED=' "$ENV_FILE" 2>/dev/null | cut -d= -f2 || echo "false")
+CRON_ENABLED=$(grep -A10 '^cron:' "$CONFIG_FILE" 2>/dev/null | grep -E '^[[:space:]]+enabled:[[:space:]]+true' || true)
+CRON_LIST=$($HERMES_AGENT/venv/bin/python $HERMES_AGENT/hermes_cli/main.py cron list 2>/dev/null || true)
 
-if [ "$CRON_ENABLED" = "true" ]; then
-    ok_msg "Cron is enabled"
-    if [ -f "$HERMES_DIR/cron-jobs.yaml" ]; then
-        ok_msg "Cron job definitions found"
+if [ -n "$CRON_ENABLED" ]; then
+    ok_msg "Cron scheduler is enabled in config.yaml"
+    if echo "$CRON_LIST" | grep -q "No scheduled jobs"; then
+        todo_msg "Cron is enabled but no jobs are created yet"
+        record_todo "Create PARAM cron jobs with hermes cron create"
+    else
+        ok_msg "Cron jobs found"
+        record_ok "Cron enabled"
     fi
-    record_ok "Cron enabled"
 else
     todo_msg "Cron not enabled. To activate:"
-    echo "  1. Set CRON_ENABLED=true in $ENV_FILE"
-    echo "  2. Copy cron definitions:"
-    echo "     cp $PARAM_DIR/configs/cron-jobs.yaml $HERMES_DIR/cron-jobs.yaml"
-    echo "  3. Set cron.enabled: true in $CONFIG_FILE (under the cron: section)"
+    echo "  1. Set cron.enabled: true in $CONFIG_FILE"
+    echo "  2. Create jobs with hermes cron create"
     record_todo "Enable cron scheduler"
 fi
 
