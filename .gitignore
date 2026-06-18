@@ -1,0 +1,22 @@
+# Local configuration overrides
+*.local.*
+
+# Authentication and credentials
+auth_info/
+
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Hermes Agent state
+.hermes/
+
+# Node.js
+node_modules/
+
+# macOS
+__pycache__/
+.DS_Store
