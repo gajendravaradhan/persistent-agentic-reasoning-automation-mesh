@@ -1,0 +1,130 @@
+# =============================================================================
+# Hermes Personal Automation Layer — Environment Variables
+# =============================================================================
+# Location: ~/.hermes/.env
+# Permissions: chmod 600 — this file contains secrets, never commit it.
+# Usage: Hermes reads this file at startup. All vars are available as env vars
+#        to the Hermes server process and any MCP servers it spawns.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# LLM Providers
+# ---------------------------------------------------------------------------
+# Which provider Hermes uses for AI reasoning and generation.
+# Supported: anthropic, openai, ollama (local)
+HERMES_LLM_PROVIDER=anthropic
+
+# --- Anthropic (Claude) ---
+# Recommended: route through TokenEye proxy for unified billing and rate limits.
+# TokenEye gives you a single key that proxies to Anthropic/OpenAI/others.
+# If not using TokenEye, set ANTHROPIC_API_KEY directly instead.
+ANTHROPIC_BASE_URL=https://api.tokeneye.io/v1/anthropic
+ANTHROPIC_API_KEY=sk-tokeneve-your-key-here
+
+# Default model. Claude Sonnet 4 is the recommended daily driver for PARAM.
+# Other options: claude-haiku-4-20250514 (fast/cheap), claude-opus-4-20250514 (deep reasoning)
+ANTHROPIC_MODEL=claude-sonnet-4-20250514
+
+# --- OpenAI (fallback / specific tasks) ---
+# Set if HERMES_LLM_PROVIDER=openai or if some skills route to OpenAI.
+OPENAI_BASE_URL=https://api.tokeneeye.io/v1/openai
+OPENAI_API_KEY=sk-tokeneve-your-key-here
+OPENAI_MODEL=gpt-4o
+
+# --- Ollama (local, no API key needed) ---
+# Set HERMES_LLM_PROVIDER=ollama to run models locally.
+# OLLAMA_BASE_URL=http://localhost:11434
+# OLLAMA_MODEL=llama3.1:70b
+
+# ---------------------------------------------------------------------------
+# Messaging — WhatsApp Gateway
+# ---------------------------------------------------------------------------
+# Hermes can send and receive WhatsApp messages via Twilio.
+# Also supports baileys (WhatsApp Web) as a free alternative.
+
+# Enable WhatsApp integration.
+WHATSAPP_ENABLED=false
+
+# Mode: "twilio" (Business API) or "baileys" (WhatsApp Web library).
+WHATSAPP_MODE=twilio
+
+# --- Twilio (when WHATSAPP_MODE=twilio) ---
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+# Your personal WhatsApp number that Hermes messages.
+TWILIO_WHATSAPP_TO=whatsapp:+1xxxxxxxxxx
+
+# Webhook endpoint for incoming messages (set in Twilio console).
+TWILIO_WEBHOOK_URL=https://your-domain.com/hermes/whatsapp/webhook
+
+# --- baileys (when WHATSAPP_MODE=baileys) ---
+# No API keys needed. Hermes pairs via QR code on first run.
+# BAILETS_AUTH_DIR=/Users/$USER/.hermes/baileys-auth
+# BAILETS_QR_TIMEOUT=120
+
+# ---------------------------------------------------------------------------
+# Memory — Long-term Persistence
+# ---------------------------------------------------------------------------
+# Hermes uses two memory providers:
+#   1. Honcho — conversation history and session context
+#   2. Mem0  — long-term user profile, preferences, facts
+
+# --- Honcho (conversation memory) ---
+# Gets HONCHO_APP_ID from https://honcho.dev/dashboard
+HONCHO_APP_ID=your-honcho-app-id
+# Local server (default). Use hosted URL if self-hosting is not feasible.
+HONCHO_BASE_URL=http://localhost:8000
+
+# --- Mem0 (knowledge graph / user memory) ---
+# Gets MEM0_API_KEY from https://app.mem0.ai/settings/api-keys
+MEM0_API_KEY=m0-your-mem0-api-key
+MEM0_USER_ID=your-user-id
+
+# ---------------------------------------------------------------------------
+# Tools & Integrations
+# ---------------------------------------------------------------------------
+
+# Huly project management (via MCP HTTP server)
+HULY_WORKSPACE_URL=https://your-workspace.huly.app
+HULY_API_TOKEN=huly_pat_your_personal_access_token
+
+# Cron scheduler
+# Enable built-in cron daemon (runs in-process with Hermes).
+CRON_ENABLED=false
+# Path to cron job definitions (relative to HERMES_CONFIG_DIR or absolute).
+CRON_DEFINITIONS=cron-jobs.yaml
+
+# Health check endpoint (optional, exposed by Hermes HTTP gateway).
+HEALTH_CHECK_PORT=9090
+HEALTH_CHECK_TOKEN=generate-a-random-token-here
+
+# ---------------------------------------------------------------------------
+# Notifications
+# ---------------------------------------------------------------------------
+# Hermes sends notifications via macOS push (osascript) or webhook.
+
+# Enable macOS system notifications.
+NOTIFICATIONS_MACOS_ENABLED=true
+
+# Webhook URL for external notification delivery (Slack, Discord, etc.).
+# NOTIFICATIONS_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz
+
+# ---------------------------------------------------------------------------
+# Security
+# ---------------------------------------------------------------------------
+# Session token used to authenticate between PARAM and Hermes.
+# Generate: openssl rand -hex 32
+HERMES_SESSION_TOKEN=generate-with-openssl-rand-hex-32
+
+# Gateway bind address. Use 127.0.0.1 to restrict to localhost.
+GATEWAY_HOST=127.0.0.1
+GATEWAY_PORT=8787
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+# Where Hermes stores runtime data (memories, logs, state).
+HERMES_CONFIG_DIR=/Users/$USER/.hermes
+HERMES_DATA_DIR=/Users/$USER/.hermes/data
+HERMES_LOG_LEVEL=info

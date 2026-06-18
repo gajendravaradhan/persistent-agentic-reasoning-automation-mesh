@@ -1,0 +1,151 @@
+# =============================================================================
+# PARAM Cron Jobs — Scheduled Automation Tasks
+# =============================================================================
+# Location: ~/.hermes/cron-jobs.yaml
+# Each job has: name, schedule (cron expression), action, and optional config.
+# All times are in the timezone set in hermes-config.yaml (cron.timezone).
+# =============================================================================
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Morning Briefing — Daily status digest
+  # -------------------------------------------------------------------------
+  # Fires at 8:00 AM every day. Checks PARAM status, pending tasks, calendar
+  # for the day, and any overnight notifications. Sends a summary via WhatsApp.
+  - name: "morning-briefing"
+    schedule: "0 8 * * *"       # Every day at 08:00
+    action: "send_whatsapp_briefing"
+    enabled: true
+    config:
+      # Which modules to include in the briefing.
+      include:
+        - system_status    # Hermes health, memory stats, uptime
+        - pending_tasks    # Active todos, unread notifications
+        - calendar_today   # Today's events from Huly/Google Calendar
+        - overnight_msgs   # WhatsApp messages received while asleep
+      # Template for the briefing message (WhatsApp markdown supported).
+      greeting: "Good morning. Here's your PARAM briefing for {date}:"
+      # If no pending items, send a short "all clear" message.
+      all_clear_message: "Morning. Nothing pending. Have a good day."
+
+  # -------------------------------------------------------------------------
+  # Task Status Updater — Push on task state change
+  # -------------------------------------------------------------------------
+  # Watches for task completion events. When a tracked task (Huly issue, todo,
+  # delegated agent task) completes, pushes a notification via WhatsApp.
+  # This is event-driven (triggered by Hermes internal hooks), not strictly cron,
+  # but is configured here for centralized job management.
+  - name: "task-status-updater"
+    schedule: "@event"          # Triggered by internal events, not a timer
+    action: "push_task_update"
+    enabled: true
+    triggers:
+      - task_completed
+      - task_failed
+      - task_review_requested
+    config:
+      # Notify on these status transitions only.
+      notify_on:
+        completed: true
+        failed: true
+        blocked: true
+        review_requested: true
+      # Template: {task_title}, {task_status}, {task_url}, {elapsed_time}
+      message_template: |
+        Task update: *{task_title}*
+        Status: {task_status}
+        Time: {elapsed_time}
+
+  # -------------------------------------------------------------------------
+  # Memory Consolidation — Prune and organize memories
+  # -------------------------------------------------------------------------
+  # Runs weekly on Sunday at 2:00 AM. Prunes stale/irrelevant memories,
+  # deduplicates facts, compacts conversation history, and generates a
+  # weekly summary. Keeps the memory store lean and relevant.
+  - name: "memory-consolidation"
+    schedule: "0 2 * * 0"       # Every Sunday at 02:00
+    action: "consolidate_memory"
+    enabled: true
+    config:
+      # Prune memories older than this many days.
+      prune_older_than_days: 90
+      # Maximum number of memories to keep (oldest pruned first).
+      max_memories: 5000
+      # Deduplicate similar facts (fuzzy match threshold 0.0-1.0).
+      dedup_threshold: 0.85
+      # Compact conversation history by summarizing old threads.
+      compact_conversations: true
+      # Keep at least this many recent conversation turns.
+      min_recent_turns: 50
+      # Generate a weekly summary and store it in long-term memory.
+      generate_weekly_summary: true
+      # Notify via WhatsApp when consolidation is complete.
+      notify_on_complete: false
+
+  # -------------------------------------------------------------------------
+  # Health Check — Verify all services running
+  # -------------------------------------------------------------------------
+  # Runs every 6 hours. Pings Hermes subsystems (memory providers, MCP servers,
+  # API gateway) and checks disk space, CPU, and process health.
+  - name: "health-check"
+    schedule: "0 */6 * * *"     # Every 6 hours (00:00, 06:00, 12:00, 18:00)
+    action: "run_health_check"
+    enabled: true
+    config:
+      # Checks to perform.
+      checks:
+        - hermes_gateway       # HTTP gateway responding?
+        - memory_providers     # Honcho + Mem0 connectivity?
+        - mcp_servers          # All configured MCP servers alive?
+        - disk_space           # /Users/$USER disk usage below threshold?
+        - cron_scheduler       # Cron daemon running?
+        - whatsapp_gateway     # Twilio/baileys connection active?
+      # Alert thresholds.
+      disk_warning_percent: 85    # Warn at 85% disk usage.
+      disk_critical_percent: 95   # Critical at 95%.
+      # Notify on failures (WhatsApp + macOS notification).
+      notify_on_failure: true
+      # Notify on recovery (when a previously-failed check passes again).
+      notify_on_recovery: true
+      # Log results to data directory.
+      log_results: true
+
+  # -------------------------------------------------------------------------
+  # Future: End-of-Day Summary
+  # -------------------------------------------------------------------------
+  # - name: "evening-wrapup"
+  #   schedule: "0 21 * * *"
+  #   action: "send_evening_summary"
+  #   enabled: false
+  #   config:
+  #     include: [completed_today, pending_for_tomorrow, time_tracking_summary]
+
+  # -------------------------------------------------------------------------
+  # Future: Weekly Review
+  # -------------------------------------------------------------------------
+  # - name: "weekly-review"
+  #   schedule: "0 10 * * 5"     # Friday at 10:00 AM
+  #   action: "generate_weekly_report"
+  #   enabled: false
+  #   config:
+  #     sections: [tasks_completed, time_spent, goals_progress, open_blockers]
+  #     output_format: markdown
+  #     save_to: /Users/$USER/.hermes/data/reports
+
+# =============================================================================
+# Cron Syntax Reference
+# =============================================================================
+# Standard 5-field cron: minute hour day-of-month month day-of-week
+#
+#   *    *    *    *    *     = every minute
+#   0    *    *    *    *     = every hour at minute 0
+#   0    8    *    *    *     = every day at 8:00 AM
+#   0    8    *    *    1-5   = weekdays at 8:00 AM
+#   0    2    *    *    0     = Sundays at 2:00 AM
+#   */15 *    *    *    *     = every 15 minutes
+#   0    */6  *    *    *     = every 6 hours
+#
+# Special schedules:
+#   @event  = triggered by Hermes internal events (not a timer)
+#   @reboot = run once on Hermes startup
+# =============================================================================

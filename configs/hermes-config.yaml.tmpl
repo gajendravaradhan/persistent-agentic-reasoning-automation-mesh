@@ -1,0 +1,190 @@
+# =============================================================================
+# Hermes Configuration — ~/.hermes/config.yaml
+# =============================================================================
+# This is the main runtime config for the Hermes personal automation server.
+# Copy to ~/.hermes/config.yaml and customize.
+# Environment variables (from ~/.hermes/.env) take precedence over values here.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Model — AI LLM settings
+# ---------------------------------------------------------------------------
+model:
+  # Primary provider: anthropic | openai | ollama
+  provider: anthropic
+
+  # Model IDs per provider. Override via env vars.
+  anthropic_model: claude-sonnet-4-20250514
+  openai_model: gpt-4o
+  # ollama_model: llama3.1:70b
+
+  # Maximum tokens for a single generation.
+  max_tokens: 8192
+
+  # Temperature (0.0 to 1.0). Lower = more deterministic.
+  temperature: 0.3
+
+  # System prompt override (optional). Hermes ships a default PARAM system prompt.
+  # system_prompt_path: /Users/$USER/.hermes/prompts/system.txt
+
+# ---------------------------------------------------------------------------
+# Agent — PARAM identity and behavior
+# ---------------------------------------------------------------------------
+agent:
+  # Display name used in messages and logs.
+  name: PARAM
+
+  # Callsign (one-word). Default: Jarvis.
+  callsign: Jarvis
+
+  # Communication style: caveman | full | balanced
+  # "caveman" = ultra-terse. "full" = complete sentences. "balanced" = terse but clear.
+  style: caveman
+
+  # Path to identity/persona file (loaded into system prompt).
+  soul_path: /Users/$USER/.hermes/soul.md
+
+# ---------------------------------------------------------------------------
+# Terminal — Shell and command execution
+# ---------------------------------------------------------------------------
+terminal:
+  # Default shell for command execution.
+  shell: /bin/bash
+
+  # Maximum time a command can run before being killed (seconds).
+  command_timeout: 300
+
+  # Working directory for commands. ~ expands to home.
+  default_workdir: /Users/$USER
+
+  # Commands matching these patterns are blocked for safety.
+  blocked_patterns:
+    - "rm -rf /"
+    - "sudo rm"
+    - "> /dev/sda"
+    - "mkfs.*"
+    - "dd if="
+
+# ---------------------------------------------------------------------------
+# Display — Notifications and output
+# ---------------------------------------------------------------------------
+display:
+  # macOS system notifications.
+  macos_notifications: true
+
+  # Webhook notifications (Slack, Discord, custom).
+  # webhook_url: https://hooks.slack.com/services/xxx/yyy/zzz
+  # webhook_format: slack  # slack | discord | plain
+
+  # CLI output verbosity: quiet | normal | verbose
+  verbosity: normal
+
+# ---------------------------------------------------------------------------
+# Memory — Long-term storage providers
+# ---------------------------------------------------------------------------
+memory:
+  # Honcho: conversation-level memory. Stores session history, context windows.
+  honcho:
+    enabled: true
+    # app_id from env HONCHO_APP_ID
+    base_url: http://localhost:8000
+
+  # Mem0: user-level memory. Stores facts, preferences, long-term knowledge.
+  mem0:
+    enabled: true
+    # api_key from env MEM0_API_KEY
+    user_id: default
+
+  # Local file-based memory (always enabled, fallback if providers are down).
+  local:
+    enabled: true
+    # Directory for local memory dumps.
+    path: /Users/$USER/.hermes/data/memory
+
+# ---------------------------------------------------------------------------
+# Delegation — How PARAM delegates work to sub-agents
+# ---------------------------------------------------------------------------
+delegation:
+  # Maximum concurrent background agents.
+  max_parallel: 5
+
+  # Default timeout for background tasks (seconds).
+  task_timeout: 600
+
+  # Whether to auto-retry failed background tasks.
+  auto_retry: false
+  max_retries: 2
+
+# ---------------------------------------------------------------------------
+# Cron — Scheduled job runner
+# ---------------------------------------------------------------------------
+cron:
+  # Enable the built-in cron scheduler.
+  enabled: false
+
+  # Path to cron job definitions YAML file.
+  definitions: cron-jobs.yaml
+
+  # Timezone for cron schedule parsing.
+  timezone: America/Chicago
+
+  # Log all cron job executions.
+  log_executions: true
+
+# ---------------------------------------------------------------------------
+# Gateway — HTTP API server
+# ---------------------------------------------------------------------------
+gateway:
+  # Enable the HTTP gateway (needed for webhooks, health checks, API access).
+  enabled: true
+
+  # Bind address. Use 127.0.0.1 for local-only. 0.0.0.0 for network access.
+  host: 127.0.0.1
+  port: 8787
+
+  # Session token for authenticating API requests and MCP connections.
+  # Set via HERMES_SESSION_TOKEN env var.
+
+  # Health check endpoint. Returns 200 if Hermes is alive.
+  health:
+    enabled: true
+    path: /health
+
+  # WhatsApp webhook endpoint (receives incoming messages from Twilio).
+  whatsapp_webhook:
+    enabled: false
+    path: /whatsapp/webhook
+
+# ---------------------------------------------------------------------------
+# Skills — Hermes skill definitions
+# ---------------------------------------------------------------------------
+skills:
+  # Directory containing skill definition files.
+  # Each skill is a YAML file with name, description, prompt, and tool grants.
+  path: /Users/$USER/.hermes/skills
+
+  # Auto-load these skills on startup.
+  auto_load:
+    - system-status
+    - whatsapp-messenger
+    - cron-scheduler
+
+# ---------------------------------------------------------------------------
+# Future — Planned integrations (inactive stubs)
+# ---------------------------------------------------------------------------
+# Uncomment and configure when these integrations are implemented.
+
+# telegram:
+#   enabled: false
+#   bot_token: from_env
+#   webhook_url: https://your-domain.com/hermes/telegram/webhook
+
+# calendar:
+#   enabled: false
+#   provider: google  # google | apple | caldav
+#   # Requires OAuth setup. See docs/calendar-setup.md
+
+# email:
+#   enabled: false
+#   provider: gmail  # gmail | outlook | imap
+#   # Requires app password or OAuth. See docs/email-setup.md

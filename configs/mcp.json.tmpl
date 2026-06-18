@@ -1,0 +1,74 @@
+{
+  "mcpServers": {
+    "hermes": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/path/to/persistent-agentic-reasoning-automation-mesh/hermes-server/build/index.js"
+      ],
+      "env": {
+        "HERMES_CONFIG_DIR": "/Users/$USER/.hermes",
+        "HERMES_DATA_DIR": "/Users/$USER/.hermes/data"
+      },
+      "comment": "Hermes personal automation MCP server. Provides WhatsApp messaging, cron scheduling, notifications, and state persistence. Runs via stdio (no network exposure)."
+    },
+
+    "huly": {
+      "type": "http",
+      "url": "https://huly.example.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${HULY_API_TOKEN}"
+      },
+      "comment": "Huly project management MCP server. Connects PARAM to Huly workspace for issue tracking, documents, calendar, and team communication. API token lives in ~/.hermes/.env (never inline here)."
+    },
+
+    "_future_file_system": {
+      "comment": "EXAMPLE ONLY — not active. Future MCP for local file system operations. Type: stdio. Authenticates via Hermes session token.",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@param/fs-mcp"],
+      "env": {
+        "ALLOWED_ROOTS": "/Users/$USER/projects",
+        "HERMES_SESSION_TOKEN": "${HERMES_SESSION_TOKEN}"
+      },
+      "disabled": true
+    },
+
+    "_future_browser": {
+      "comment": "EXAMPLE ONLY — not active. Future MCP for headless browser automation. Type: http. Proxies through Hermes gateway.",
+      "type": "http",
+      "url": "http://localhost:9222/mcp",
+      "headers": {
+        "X-Hermes-Session": "${HERMES_SESSION_TOKEN}"
+      },
+      "disabled": true
+    },
+
+    "_future_git": {
+      "comment": "EXAMPLE ONLY — not active. Future MCP for git operations with PARAM-managed credentials. Type: stdio.",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@param/git-mcp"],
+      "env": {
+        "GIT_AUTHOR_NAME": "PARAM",
+        "GIT_AUTHOR_EMAIL": "param@local",
+        "HERMES_SESSION_TOKEN": "${HERMES_SESSION_TOKEN}"
+      },
+      "disabled": true
+    },
+
+    "_future_telegram": {
+      "comment": "EXAMPLE ONLY — not active. Future MCP for Telegram messaging. Type: http. Uses Bot API token from Hermes env.",
+      "type": "http",
+      "url": "http://localhost:8081/mcp",
+      "headers": {
+        "X-Telegram-Bot-Token": "${TELEGRAM_BOT_TOKEN}"
+      },
+      "disabled": true
+    }
+  },
+
+  "_schema_note": "Every MCP server entry follows this structure: type (stdio | http), for stdio: command + args + env, for http: url + headers. API keys and secrets MUST live in environment variables or ~/.hermes/.env — NEVER inline in this file. Set disabled: true to keep a server defined but inactive.",
+  "_naming_convention": "Prefixed entries starting with _future are example stubs showing how to add new integrations. Remove the _future prefix and disabled flag to activate.",
+  "_env_source": "All ${VAR} placeholders resolve from the parent process environment or from ~/.hermes/.env (loaded by Hermes at startup)."
+}
