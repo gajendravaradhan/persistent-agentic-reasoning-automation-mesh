@@ -6,7 +6,7 @@ Common issues, diagnostic commands, and their fixes.
 
 ## 1. Hermes Tools Not Showing Up
 
-**Symptom:** `mcp__hermes__*` tools are missing from OMO's tool list. PARAM cannot check WhatsApp, run cron jobs, or access persistent state.
+**Symptom:** `hermes__*` tools are missing from OMO's tool list. PARAM cannot check WhatsApp, run cron jobs, or access persistent state.
 
 ### Check the MCP Config
 
@@ -83,13 +83,13 @@ OMO reads `~/.mcp.json` at startup. Restart your OMO session after fixing config
 
 1. Exit current OMO session
 2. Start a new session
-3. Check tool list for `mcp__hermes__*` entries
+3. Check tool list for `hermes__*` entries
 
 ---
 
 ## 2. WhatsApp Not Connecting
 
-**Symptom:** `mcp__hermes__messages_read` returns errors or no messages. WhatsApp bridge is offline.
+**Symptom:** `hermes__messages_read` returns errors or no messages. WhatsApp bridge is offline.
 
 ### Check Gateway Status
 
@@ -235,7 +235,7 @@ If a server starts and immediately crashes in a loop:
 
 ## 5. Memory Not Persisting
 
-**Symptom:** PARAM forgets context between sessions. `mcp__hermes__state_get` returns stale or empty data.
+**Symptom:** PARAM forgets context between sessions. `hermes__state_get` returns stale or empty data.
 
 ### Check Memory Directory
 
@@ -275,8 +275,8 @@ df -h ~/.hermes/
 Write and read a test value:
 ```
 # In PARAM session:
-mcp__hermes__state_set key="test_key" value="hello"
-mcp__hermes__state_get key="test_key"
+hermes__state_set key="test_key" value="hello"
+hermes__state_get key="test_key"
 # Should return "hello"
 ```
 

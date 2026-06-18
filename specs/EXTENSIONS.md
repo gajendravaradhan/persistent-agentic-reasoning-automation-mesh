@@ -53,9 +53,9 @@ Examples from the running mesh:
 
 | Tool | Source |
 |------|--------|
-| `mcp__hermes__messages_read` | Hermes WhatsApp bridge |
-| `mcp__hermes__cron_status` | Hermes cron scheduler |
-| `mcp__hermes__state_set` | Hermes persistent state |
+| `hermes__messages_read` | Hermes WhatsApp bridge |
+| `hermes__cron_status` | Hermes cron scheduler |
+| `hermes__state_set` | Hermes persistent state |
 | `mcp__huly__create_issue` | Huly project tracker |
 
 ### The Rule
@@ -348,7 +348,7 @@ A new integration could be anything:
 
 | Integration | Prefix | Status | Purpose |
 |-------------|--------|--------|---------|
-| Hermes | `mcp__hermes__*` | Active | WhatsApp, cron, notifications, state |
+| Hermes | `hermes__*` | Active | WhatsApp, cron, notifications, state |
 | Huly | `mcp__huly__*` | Active | Project tracking, issues, documentation |
 | Slack | `mcp__slack__*` | Active | Team messaging, alert delivery |
 
