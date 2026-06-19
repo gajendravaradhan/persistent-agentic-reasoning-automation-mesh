@@ -4,21 +4,11 @@
 # Target: Ugreen NAS with Docker Compose
 # Image:  nousresearch/hermes-agent:latest (public Docker Hub)
 #
-# Single container runs both gateway + dashboard via s6 supervision.
-# Cloudflared runs natively (not in Docker — simpler, fewer path issues).
+# All services use restart: unless-stopped for NAS reboot survival.
+# Cloudflared runs in Docker instead of natively — no systemd/sudo needed.
 
 services:
-  # TokenEye — LLM proxy with load balancing between opencode-go accounts
-  tokeneye:
-    image: oven/bun:latest
-    container_name: param-tokeneye
-    restart: unless-stopped
-    network_mode: host
-    working_dir: /app
-    volumes:
-      - /home/Nasama-Pochu/param/tokeneye:/app-src:ro
-      - /home/Nasama-Pochu/param/tokeneye-config:/root/.config/tokeneye
-    command: ["sh", "-c", "mkdir -p /app/work && cp /app-src/* /app/work/ 2>/dev/null; cd /app/work && bun install && exec bun run src/index.ts"]
+  # Hermes — gateway + dashboard via s6 supervision
   hermes:
     image: nousresearch/hermes-agent:latest
     container_name: param
@@ -36,3 +26,29 @@ services:
       - HERMES_DASHBOARD_HOST=0.0.0.0
       - HERMES_DASHBOARD_INSECURE=1
     command: ["gateway", "run"]
+    depends_on:
+      - tokeneye
+
+  # TokenEye — LLM proxy with load balancing between opencode-go accounts
+  tokeneye:
+    image: oven/bun:latest
+    container_name: param-tokeneye
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /app
+    volumes:
+      - /home/Nasama-Pochu/param/tokeneye:/app-src:ro
+      - /home/Nasama-Pochu/param/tokeneye-config:/root/.config/tokeneye
+    command: ["sh", "-c", "mkdir -p /app/work && cp /app-src/* /app/work/ 2>/dev/null; cd /app/work && bun install && exec bun run src/index.ts"]
+
+  # Cloudflare Tunnel — auto-starts on NAS reboot via Docker restart policy
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: param-cloudflared
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /home/Nasama-Pochu/.cloudflared:/home/nonroot/.cloudflared:ro
+    command: ["tunnel", "--config", "/home/nonroot/.cloudflared/config.yml", "run"]
+    depends_on:
+      - hermes

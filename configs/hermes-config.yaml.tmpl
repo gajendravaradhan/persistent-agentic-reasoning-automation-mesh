@@ -38,6 +38,17 @@ model:
   # max_tokens: 8192
 
 # ---------------------------------------------------------------------------
+# Fallback Providers — chain when primary is rate-limited
+# ---------------------------------------------------------------------------
+# If the primary provider (opencode-go via TokenEye) returns rate-limit or
+# server errors, Hermes tries each fallback in order until one succeeds.
+fallback_providers:
+  - provider: nous
+    default: nous-hermes-3
+    base_url: https://api.nousresearch.com/v1
+    api_key: ''          # set via NOUS_API_KEY env var
+
+# ---------------------------------------------------------------------------
 # Agent — PARAM identity and behavior
 # ---------------------------------------------------------------------------
 agent:
