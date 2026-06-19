@@ -17,6 +17,8 @@ services:
     volumes:
       - ./hermes-data:/opt/data
       - ./hermes-data/scripts:/opt/data/scripts
+      - /home/Nasama-Pochu/param/vault:/workspace/vault
+      - /home/Nasama-Pochu/.cloudflared:/home/nonroot/.cloudflared:ro
     environment:
       - HERMES_UID=${HERMES_UID:-1000}
       - HERMES_GID=${HERMES_GID:-1000}

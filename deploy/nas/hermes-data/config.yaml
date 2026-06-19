@@ -187,7 +187,7 @@ cron:
       Use mtime-based detection. Only ingest files changed since last sync. 90-second
       wall budget. Report files synced or skip if no changes.
     skills: []
-    enabled: false
+    enabled: true
   - name: planner-daily-note
     schedule: 0 22 * * *
     prompt: >
@@ -195,7 +195,7 @@ cron:
       Include: tasks completed today, sessions run, errors encountered, decisions
       made, memory growth, token usage. Keep concise and factual.
     skills: []
-    enabled: false
+    enabled: true
   - name: tunnel-watchdog
     schedule: '*/5 * * * *'
     script: cloudflared-watchdog.sh
