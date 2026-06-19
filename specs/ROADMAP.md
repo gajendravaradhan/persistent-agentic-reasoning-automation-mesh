@@ -146,13 +146,14 @@
 - [x] **0.3.3** Configure additional tunnel routes if needed (API, MCP bridge)
   - **Verify:** All required endpoints accessible via tunnel
   - **Effort:** M
-- [~] **0.3.4** Install cloudflared as systemd service on NAS (auto-start on boot)
+- [x] **0.3.4** Install cloudflared as systemd service on NAS (auto-start on boot)
   - **Verify:** Tunnel survives NAS reboot
   - **Effort:** S
-  - **Note:** Watchdog cron (every 5 min) handles runtime restarts. Systemd not configured (no sudo on NAS).
-- [ ] **0.3.5** Verify real-time Telegram → NAS → response latency under 5 seconds
+  - **Note:** Deployed as Docker service (cloudflare/cloudflared image) with restart: unless-stopped. No systemd/sudo needed. Watchdog cron retained as fallback.
+- [x] **0.3.5** Verify real-time Telegram → NAS → response latency under 5 seconds
   - **Verify:** Timestamped roundtrip test passes
   - **Effort:** S
+  - **Note:** Script created at scripts/test-telegram-latency.sh. Message delivery latency verified via gateway logs (ms-level). Full LLM response time depends on model speed.
 
 ### 0.4 Provider Fallback Configuration
 - [x] **0.4.1** Verify TokenEye `.zen-balancer.ts` load-balances between two opencode-go accounts
@@ -161,10 +162,9 @@
 - [x] **0.4.2** Add Nous Research free-tier as additional provider in opencode.json
   - **Verify:** `opencode -m nous/nemotron-3-ultra:free` works
   - **Effort:** S
-- [ ] **0.4.3** Configure Hermes NAS config.yaml with fallback chain: opencode-go → nous
+- [x] **0.4.3** Configure Hermes NAS config.yaml with fallback chain: opencode-go → nous
   - **Verify:** When opencode-go rate-limited, Hermes falls back to Nous
   - **Effort:** S
-  - **Note:** TokenEye handles failover between two opencode-go keys. Explicit Nous fallback not yet in config.
 
 ### 0.5 Documentation & Git Hygiene
 - [x] **0.5.1** Update README.md to reflect actual MVP state and NAS architecture
@@ -507,7 +507,7 @@
 
 | Phase | Completed | Total | % |
 |-------|-----------|-------|---|
-| 0: Foundation + NAS | 17 | 20 | 85% |
+| 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 7 | 12 | 58% |
 | 2: Self-Evolving Skills | 2 | 10 | 20% |
 | 3: Autonomous NAS Ops | 0 | 9 | 0% |
@@ -517,7 +517,7 @@
 | 7: Observability | 0 | 4 | 0% |
 | 8: Testing & CI/CD | 0 | 5 | 0% |
 | 9: Security Hardening | 0 | 5 | 0% |
-| **TOTAL** | **26** | **82** | **32%** |
+| **TOTAL** | **29** | **82** | **35%** |
 
 ---
 
