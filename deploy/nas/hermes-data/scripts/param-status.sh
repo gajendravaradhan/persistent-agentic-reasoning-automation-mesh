@@ -60,7 +60,23 @@ else
     echo -e "${YELLOW}NOT RUNNING${NC}"
 fi
 
-# 7. Vault
+# 7. Memory (Honcho)
+echo -n "  Honcho:       "
+if curl -s http://localhost:8000/health > /dev/null 2>&1; then
+    echo -e "${GREEN}HEALTHY${NC}"
+else
+    echo -e "${RED}DOWN${NC}"
+fi
+
+# 8. Hindsight
+echo -n "  Hindsight:    "
+if [ -f /opt/data/hindsight/config.json ]; then
+    echo -e "${GREEN}CONFIGURED${NC}"
+else
+    echo -e "${YELLOW}NOT CONFIGURED${NC}"
+fi
+
+# 9. Vault
 echo -n "  Vault:        "
 if [ -d /workspace/vault ]; then
     DIRS=$(ls -d /workspace/vault/*/ 2>/dev/null | wc -l)
