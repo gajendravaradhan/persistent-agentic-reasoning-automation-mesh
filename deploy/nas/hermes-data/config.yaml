@@ -433,7 +433,11 @@ gateway:
   message_timestamps:
     enabled: false
   platforms:
+    discord:
+      enabled: true
     telegram:
+      enabled: true
+    webhook:
       enabled: true
   strict: false
   trust_recent_files: true
