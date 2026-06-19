@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# PARAM Status Checker — quick health dashboard
+# PARAM Status Checker — container-aware version (Docker on NAS)
+# Uses /opt/data/ instead of ~/.hermes/ for container compatibility
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -9,30 +10,21 @@ BOLD='\033[1m'
 
 echo -e "${BOLD}PARAM Status Dashboard${NC}"
 echo "======================"
-echo ""
 
-env_value() {
-    grep -E "^$1=" "$HOME/.hermes/.env" 2>/dev/null | tail -n1 | cut -d= -f2- | sed "s/[[:space:]]*#.*$//" | xargs
-}
-
-# 1. Hermes Agent
-echo -n "  Hermes Agent: "
-if [ -d "$HOME/.hermes/hermes-agent" ]; then
-    echo -e "${GREEN}INSTALLED${NC}"
+# 1. Hermes Gateway
+echo -n "  Gateway:      "
+if ps aux 2>/dev/null | grep -q "[h]ermes gateway run"; then
+    echo -e "${GREEN}RUNNING${NC}"
 else
-    echo -e "${RED}MISSING${NC}"
+    echo -e "${RED}DOWN${NC}"
 fi
 
-# 2. MCP Server
-echo -n "  MCP Server:   "
-if python3 -c "import py_compile; py_compile.compile('$HOME/projects/persistent-agentic-reasoning-automation-mesh/param_hermes_mcp.py', doraise=True)" 2>/dev/null; then
-    TOOLS=$(/Users/gajendra/projects/persistent-agentic-reasoning-automation-mesh/.venv/bin/python -c "
-import os,sys; os.environ['HERMES_HOME']='$HOME/.hermes'; sys.path.insert(0,'$HOME/.hermes/hermes-agent')
-from tools.registry import registry, discover_builtin_tools; discover_builtin_tools()
-print(len(registry._snapshot_entries()))" 2>/dev/null)
-    echo -e "${GREEN}$TOOLS tools${NC}"
+# 2. Dashboard
+echo -n "  Dashboard:    "
+if curl -s http://localhost:9119/ > /dev/null 2>&1; then
+    echo -e "${GREEN}RUNNING${NC}"
 else
-    echo -e "${RED}SYNTAX ERROR${NC}"
+    echo -e "${RED}DOWN${NC}"
 fi
 
 # 3. TokenEye
@@ -44,83 +36,45 @@ else
     echo -e "${RED}DOWN${NC}"
 fi
 
-# 4. Model provider
-echo -n "  Model route:  "
-MODEL_INFO=$($HOME/.hermes/hermes-agent/venv/bin/python - <<'PY' 2>/dev/null
-from pathlib import Path
-import yaml
-cfg = yaml.safe_load(Path.home().joinpath('.hermes/config.yaml').read_text())
-model = cfg.get('model', {})
-provider = model.get('provider') or 'auto'
-default = model.get('default') or model.get('model') or 'unset'
-base = model.get('base_url') or ''
-print(f"{provider}:{default}" + (" via " + base if base else ""))
-PY
-)
-if [ -n "$MODEL_INFO" ]; then
-    echo -e "${GREEN}$MODEL_INFO${NC}"
+# 4. Telegram
+echo -n "  Telegram:     "
+if grep -q "telegram connected" /opt/data/logs/agent.log 2>/dev/null; then
+    echo -e "${GREEN}CONNECTED${NC}"
 else
-    echo -e "${YELLOW}UNKNOWN${NC}"
+    echo -e "${YELLOW}DISCONNECTED${NC}"
 fi
 
-# 5. Telegram
-echo -n "  Telegram:    "
-if [ -n "$(env_value TELEGRAM_BOT_TOKEN)" ]; then
-    if [ -n "$(env_value TELEGRAM_ALLOWED_USERS)" ]; then
-        echo -e "${GREEN}CONFIGURED${NC}"
-    else
-        echo -e "${YELLOW}TOKEN SET — add TELEGRAM_ALLOWED_USERS${NC}"
-    fi
-else
-    echo -e "${YELLOW}NO BOT TOKEN — create bot with @BotFather${NC}"
-fi
-
-# 6. Memory
-echo -n "  Memory seeds: "
-if [ -f "$HOME/.hermes/memories/MEMORY.md" ] && [ -f "$HOME/.hermes/memories/USER.md" ]; then
-    echo -e "${GREEN}SEEDED${NC}"
-else
-    echo -e "${RED}MISSING${NC}"
-fi
-
-echo -n "  Honcho:       "
-if [ -n "$(env_value HONCHO_API_KEY)" ]; then
-    echo -e "${GREEN}CONFIGURED${NC}"
-else
-    echo -e "${YELLOW}NO API KEY${NC}"
-fi
-
-echo -n "  Mem0:         "
-if [ -n "$(env_value MEM0_API_KEY)" ]; then
-    echo -e "${GREEN}CONFIGURED${NC}"
-else
-    echo -e "${YELLOW}NO API KEY${NC}"
-fi
-
-# 7. Identity
-echo -n "  AGENTS.md:    "
-if [ -f "$HOME/.config/opencode/AGENTS.md" ]; then
-    echo -e "${GREEN}DEPLOYED ($(wc -l < $HOME/.config/opencode/AGENTS.md | tr -d ' ') lines)${NC}"
-else
-    echo -e "${RED}MISSING${NC}"
-fi
-
-echo -n "  SOUL.md:      "
-if [ -f "$HOME/.hermes/SOUL.md" ]; then
-    echo -e "${GREEN}DEPLOYED ($(wc -l < $HOME/.hermes/SOUL.md | tr -d ' ') lines)${NC}"
-else
-    echo -e "${RED}MISSING${NC}"
-fi
-
-# 8. Cron
+# 5. Cron
 echo -n "  Cron:         "
-CRON_COUNT=$($HOME/.hermes/hermes-agent/venv/bin/hermes cron list 2>/dev/null | grep -c '\[active\]' || true)
-if [ "$CRON_COUNT" -gt 0 ]; then
-    echo -e "${GREEN}CONFIGURED ($CRON_COUNT job(s))${NC}"
-elif grep -q "^[[:space:]]*enabled: true" "$HOME/.hermes/config.yaml" 2>/dev/null; then
-    echo -e "${YELLOW}ENABLED (no jobs created yet)${NC}"
+if grep -q "Cron ticker started" /opt/data/logs/agent.log 2>/dev/null; then
+    echo -e "${GREEN}ACTIVE${NC}"
 else
-    echo -e "${YELLOW}NOT CONFIGURED${NC}"
+    echo -e "${YELLOW}NOT RUNNING${NC}"
+fi
+
+# 6. Kanban
+echo -n "  Kanban:       "
+if grep -q "kanban dispatcher" /opt/data/logs/agent.log 2>/dev/null; then
+    echo -e "${GREEN}ACTIVE${NC}"
+else
+    echo -e "${YELLOW}NOT RUNNING${NC}"
+fi
+
+# 7. Vault
+echo -n "  Vault:        "
+if [ -d /workspace/vault ]; then
+    DIRS=$(ls -d /workspace/vault/*/ 2>/dev/null | wc -l)
+    echo -e "${GREEN}MOUNTED ($DIRS dirs)${NC}"
+else
+    echo -e "${RED}NOT MOUNTED${NC}"
+fi
+
+# 8. Cloudflare tunnel
+echo -n "  Tunnel:       "
+if ps aux 2>/dev/null | grep -q "[c]loudflared tunnel run param"; then
+    echo -e "${GREEN}RUNNING${NC}"
+else
+    echo -e "${YELLOW}DOWN${NC}"
 fi
 
 echo ""
