@@ -41,7 +41,16 @@ services:
       - /home/Nasama-Pochu/param/tokeneye-config:/root/.config/tokeneye
     command: ["sh", "-c", "mkdir -p /app/work && cp /app-src/* /app/work/ 2>/dev/null; cd /app/work && bun install && exec bun run src/index.ts"]
 
-  # Cloudflare Tunnel — auto-starts on NAS reboot via Docker restart policy
+  # SearXNG — private search engine
+  searxng:
+    image: searxng/searxng:latest
+    container_name: param-searxng
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - SEARXNG_BIND_ADDRESS=0.0.0.0:8889
+      - SEARXNG_BASE_URL=http://localhost:8889/
+      - SEARXNG_SECRET=PARAM-searxng-secret-change-me — auto-starts on NAS reboot via Docker restart policy
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: param-cloudflared

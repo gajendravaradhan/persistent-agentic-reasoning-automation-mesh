@@ -1,0 +1,25 @@
+use_default_settings: true
+general:
+  instance_name: "PARAM Search"
+  debug: false
+  privacypolicy_url: false
+  contact_url: false
+search:
+  safe_search: 0
+  autocomplete: "google"
+  formats:
+    - html
+    - json
+server:
+  secret_key: "PARAM-searxng-secret-change-me"
+  bind_address: "0.0.0.0"
+  port: 8889
+  limiter: false
+  public_instance: false
+ui:
+  static_use_hash: true
+  default_locale: en
+  theme: simple
+outgoing:
+  request_timeout: 10.0
+  max_request_timeout: 30.0

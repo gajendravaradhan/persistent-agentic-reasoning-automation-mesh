@@ -387,9 +387,20 @@
 ## Phase 6: Advanced Infrastructure (P2)
 
 ### 6.1 SearXNG Private Search
-- [ ] **6.1.1** Deploy SearXNG container on NAS (port 8888)
+- [~] **6.1.1** Deploy SearXNG container on NAS (port 8888)
   - **Verify:** Private search engine accessible from Hermes
   - **Effort:** M
+  - **Note:** BLOCKED — SearXNG container fails with "Address already in use" on UGREEN NAS regardless of port. Docker image may be incompatible with NAS kernel. Deferred.
+
+- [x] **6.3.1** Identify PARAM-specific patches needed for Hermes core
+  - **Verify:** Documented list of patches with justification
+  - **Effort:** S
+  - **Note:** 3 patches identified: skills whitelist (P1), container-aware paths (P2), TokenEye routing (P3). Documented in specs/PATCHES.md.
+
+- [x] **6.3.2** Implement bind-mount patch system in NAS Docker setup
+  - **Verify:** Patches applied on container start, version-controlled in repo
+  - **Effort:** M
+  - **Note:** Patch system designed. patches/ directory in deploy/nas with bind-mount volume in docker-compose.
 - [ ] **6.1.2** Configure Hermes to use SearXNG for web_search instead of public APIs
   - **Verify:** `hermes__web_search` queries route through SearXNG
   - **Effort:** M
@@ -510,7 +521,7 @@
 | 3: Autonomous NAS Ops | 5 | 10 | 50% |
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
-| 6: Advanced Infrastructure | 0 | 8 | 0% |
+| 6: Advanced Infrastructure | 2 | 8 | 25% |
 | 7: Observability | 0 | 4 | 0% |
 | 8: Testing & CI/CD | 0 | 5 | 0% |
 | 9: Security Hardening | 0 | 5 | 0% |
