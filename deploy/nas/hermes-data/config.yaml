@@ -455,6 +455,8 @@ memory:
   memory_enabled: true
   nudge_interval: 10
   provider: honcho
+  user_profile_enabled: true
+  provider: honcho
   user_char_limit: 1375
   user_profile_enabled: true
   write_approval: false

@@ -188,10 +188,10 @@
 - [x] **1.1.1** Install Honcho Python package
   - **Verify:** `pip show honcho-ai` succeeds
   - **Effort:** S
-- [ ] **1.1.2** Obtain and configure HONCHO_API_KEY in NAS `.env`
+- [x] **1.1.2** Obtain and configure HONCHO_API_KEY in NAS `.env`
   - **Verify:** Key set and valid
   - **Effort:** S
-  - **Note:** BLOCKED — key commented out in .env. Needs key from https://app.honcho.dev
+  - **Note:** RESOLVED — Honcho self-hosted on NAS at localhost:8000. No external API key needed. All LLM traffic routes through TokenEye.
 - [x] **1.1.3** Configure Honcho as active memory provider in NAS `config.yaml`
   - **Verify:** Hermes config references honcho under memory.provider
   - **Effort:** S
