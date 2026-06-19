@@ -296,6 +296,12 @@ cron:
       on failure.
     schedule: 0 */4 * * *
     skills: []
+  - enabled: true
+    name: cost-monitor
+    prompt: Check TokenEye at localhost:8787/__health. Report record count. Alert
+      if TokenEye down or records not increasing.
+    schedule: 0 */6 * * *
+    skills: []
   max_parallel_jobs: null
   tick_interval_seconds: 60
   wrap_response: true
