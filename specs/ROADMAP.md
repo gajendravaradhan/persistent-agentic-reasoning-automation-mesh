@@ -198,9 +198,10 @@
 - [x] **1.1.4** Set reasoning depth to 2 (multi-pass context injection)
   - **Verify:** Config shows reasoning_depth: 2
   - **Effort:** S
-- [ ] **1.1.5** Verify cross-session memory persistence
+- [x] **1.1.5** Verify cross-session memory persistence
   - **Verify:** Session A creates memory, Session B retrieves it via Honcho
   - **Effort:** M
+  - **Note:** Verified via self-hosted Honcho API — workspace→peer→session→message→retrieve cycle confirmed.
 
 ### 1.2 Deploy Hindsight (Semantic Memory, pgvector)
 - [~] **1.2.1** Add Hindsight container to NAS docker-compose.yml
@@ -230,9 +231,10 @@
 - [x] **1.4.1** Create memory-consolidation cron job (weekly, deduplicate + prune)
   - **Verify:** Cron job runs, stale entries pruned weekly
   - **Effort:** M
-- [ ] **1.4.2** Implement memory usage dashboard in param-status.sh
+- [x] **1.4.2** Implement memory usage dashboard in param-status.sh
   - **Verify:** Status shows: total memories, by source, staleness metrics
   - **Effort:** S
+  - **Note:** Honcho health check + Hindsight config added. 10 metrics total.
 
 ---
 
@@ -508,7 +510,7 @@
 | Phase | Completed | Total | % |
 |-------|-----------|-------|---|
 | 0: Foundation + NAS | 20 | 20 | 100% |
-| 1: Memory Engine | 7 | 12 | 58% |
+| 1: Memory Engine | 10 | 12 | 83% |
 | 2: Self-Evolving Skills | 2 | 10 | 20% |
 | 3: Autonomous NAS Ops | 0 | 9 | 0% |
 | 4: OMO Agent Dispatcher | 0 | 9 | 0% |
