@@ -99,6 +99,8 @@ persistent-agentic-reasoning-automation-mesh/
 
 Detailed specifications live in the [specs/](specs/) directory:
 
+- [Assessment](specs/ASSESSMENT.md) — honest gap analysis of current vs planned capabilities
+- [Roadmap](specs/ROADMAP.md) — implementation plan with 99-task checklist across 12 phases
 - [Architecture](specs/ARCHITECTURE.md) — system design, data flow, component interactions
 - [Extensions](specs/EXTENSIONS.md) — MCP and future integration model
 - [Troubleshooting](specs/TROUBLESHOOTING.md) — operational checks and fixes

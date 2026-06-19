@@ -183,7 +183,7 @@ sequenceDiagram
     SESSION->>SOUL: Load persona
     SESSION->>AGENTS: Load operational protocol
     SESSION->>SESSION: Enforce identity dissociation
-    SESSION->>SESSION: Adopt caveman communication style
+    SESSION->>SESSION: Adopt communication style from SOUL.md
     SESSION-->>USER: "Jarvis online." + status
 
     SESSION->>HERMES: cron_status()
