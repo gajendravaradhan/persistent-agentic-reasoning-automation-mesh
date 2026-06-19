@@ -198,6 +198,7 @@
 - [x] **1.1.4** Set reasoning depth to 2 (multi-pass context injection)
   - **Verify:** Config shows reasoning_depth: 2
   - **Effort:** S
+  - **Note:** Set in deploy/nas/hermes-data/config.yaml under memory section.
 - [x] **1.1.5** Verify cross-session memory persistence
   - **Verify:** Session A creates memory, Session B retrieves it via Honcho
   - **Effort:** M
@@ -492,9 +493,9 @@
 
 | Phase | Tasks | Priority | Total Effort |
 |-------|-------|----------|-------------|
-| 0: Foundation + NAS | 16 | P0 | S-M |
-| 1: Memory Engine | 12 | P0 | S-M |
-| 2: Self-Evolving Skills | 10 | P0 | S-M |
+| 0: Foundation + NAS | 20 | P0 | S-M |
+| 1: Memory Engine | 13 | P0 | S-M |
+| 2: Self-Evolving Skills | 11 | P0 | S-M |
 | 3: Autonomous NAS Ops | 9 | P1 | M |
 | 4: OMO Agent Dispatcher | 9 | P1 | M |
 | 5: Multi-Channel Gateway | 4 | P2 | M |
@@ -512,8 +513,8 @@
 | Phase | Completed | Total | % |
 |-------|-----------|-------|---|
 | 0: Foundation + NAS | 20 | 20 | 100% |
-| 1: Memory Engine | 10 | 12 | 83% |
-| 2: Self-Evolving Skills | 3 | 10 | 30% |
+| 1: Memory Engine | 10 | 13 | 77% |
+| 2: Self-Evolving Skills | 3 | 11 | 27% |
 | 3: Autonomous NAS Ops | 0 | 9 | 0% |
 | 4: OMO Agent Dispatcher | 0 | 9 | 0% |
 | 5: Multi-Channel Gateway | 0 | 4 | 0% |
