@@ -50,7 +50,7 @@ services:
     # Dashboard bound to localhost:9119. For remote access, use
     # Cloudflare Tunnel or SSH port forwarding:
     #   ssh -L 9119:localhost:9119 user@nas
-    command: ["dashboard", "--host", "127.0.0.1", "--no-open"]
+    command: ["dashboard", "--host", "0.0.0.0", "--insecure", "--no-open"]
 
   # ------------------------------------------------------------------
   # TokenEye — local model proxy (optional)
