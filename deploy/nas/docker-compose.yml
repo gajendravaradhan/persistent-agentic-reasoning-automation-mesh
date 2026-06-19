@@ -22,4 +22,7 @@ services:
     environment:
       - HERMES_UID=${HERMES_UID:-1000}
       - HERMES_GID=${HERMES_GID:-1000}
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_INSECURE=1
     command: ["gateway", "run"]
