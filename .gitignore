@@ -22,3 +22,4 @@ __pycache__/
 .DS_Store
 .certs/
 .coverage
+param_hermes_mcp.py,cover
