@@ -1,0 +1,129 @@
+# PARAM Skill Sets — Per-Agent-Type Whitelist
+#
+# Hermes loads ALL 71 skills into every session's system prompt.
+# This bloat (~15K+ tokens) can be reduced by loading only relevant skills.
+#
+# Implementation option A (Phase 6): Patch prompt_builder.py to support
+#   skills.include in config.yaml (mirrors existing skills.disabled pattern).
+#
+# Implementation option B (now): Use skills.disabled to block non-relevant
+#   skills per platform. Works today but requires maintaining the inverse list.
+#
+# These sets serve as the canonical reference regardless of implementation.
+
+# ============================================================================
+# OMO Agent Roles → Required Skill Sets
+# ============================================================================
+
+sisyphus:  # orchestrator — coordinates all agents
+  - systematic-debugging
+  - requesting-code-review
+  - simplify-code
+  - plan
+  - hermes-agent
+  - opencode
+
+oracle:  # high-IQ reasoning — debugging + architecture
+  - systematic-debugging
+  - simplify-code
+  - hermes-agent
+
+explore:  # codebase search — grep/ast-grep patterns
+  - codebase-inspection
+  - hermes-agent
+
+librarian:  # external reference search — docs/OSS/web
+  - hermes-agent
+  - opencode
+
+hephaestus:  # implementation — code writing + testing
+  - systematic-debugging
+  - test-driven-development
+  - requesting-code-review
+  - simplify-code
+  - github-pr-workflow
+  - github-code-review
+  - github-issues
+  - github-repo-management
+  - github-auth
+  - node-inspect-debugger
+  - python-debugpy
+  - plan
+  - hermes-agent
+  - opencode
+  - spike
+  - codex
+  - claude-code
+
+sisyphus-junior:  # task execution — focused work
+  - systematic-debugging
+  - test-driven-development
+  - requesting-code-review
+  - hermes-agent
+
+metis:  # pre-planning analysis
+  - plan
+  - hermes-agent
+
+momus:  # plan review + QA
+  - requesting-code-review
+  - systematic-debugging
+  - hermes-agent
+
+prometheus:  # plan creation
+  - plan
+  - hermes-agent
+
+atlas:  # orchestration
+  - hermes-agent
+  - opencode
+  - plan
+
+# ============================================================================
+# Category Roles → Required Skill Sets
+# ============================================================================
+
+visual-engineering:
+  - architecture-diagram
+  - popular-web-designs
+  - sketch
+  - claude-design
+  - p5js
+  - hermes-agent
+
+ultrabrain:
+  - systematic-debugging
+  - plan
+  - hermes-agent
+
+deep:
+  - systematic-debugging
+  - test-driven-development
+  - hermes-agent
+  - plan
+
+quick:
+  - systematic-debugging
+  - hermes-agent
+
+writing:
+  - hermes-agent
+
+# ============================================================================
+# Skills NOT needed by any PARAM agent (domain-specific, unused)
+# ============================================================================
+# These can be globally disabled to save tokens:
+#   apple-notes, apple-reminders, findmy, imessage, macos-computer-use
+#   comfyui, baoyu-infographic, manim-video, pretext, songwriting-and-ai-music
+#   touchdesigner-mcp, ascii-art, ascii-video, excalidraw
+#   jupyter-live-kernel, himalaya
+#   audiocraft-audio-generation, llama-cpp, vllm
+#   audiocraft, evaluating-llms-harness, huggingface-hub
+#   segment-anything-model, weights-and-biases
+#   obsidian, airtable, google-workspace, maps, nano-pdf
+#   notion, ocr-and-documents, powerpoint, teams-meeting-pipeline
+#   arxiv, blogwatcher, llm-wiki, polymarket, research-paper-writing
+#   openhue, xurl, gif-search, heartmula, songsee
+#   youtube-content, image_generate, video_generate, text_to_speech
+#   dogfood, yuanbao, discord, discord_admin, feishu_*
+#   hermes-agent-skill-authoring, homeassistant
