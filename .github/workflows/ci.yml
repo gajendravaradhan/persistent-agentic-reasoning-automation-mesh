@@ -1,0 +1,62 @@
+name: PARAM CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov pytest-asyncio pyyaml
+          pip install mutmut
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/ -v --tb=short --cov=. --cov-report=term --cov-report=xml --cov-fail-under=90
+
+      - name: Run mutation tests (PIT)
+        run: |
+          mutmut run --paths-to-mutate=param_hermes_mcp.py --runner="python -m pytest" || true
+          mutmut results
+
+      - name: Check coverage threshold
+        run: |
+          coverage report --fail-under=90
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell script syntax check
+        run: |
+          find . -name "*.sh" -type f -exec bash -n {} \;
+      - name: YAML validation
+        run: |
+          pip install pyyaml
+          python -c "
+          import yaml, os, sys
+          errors = 0
+          for root, dirs, files in os.walk('.'):
+              for f in files:
+                  if f.endswith(('.yml', '.yaml')):
+                      path = os.path.join(root, f)
+                      try:
+                          with open(path) as fh:
+                              yaml.safe_load(fh)
+                      except Exception as e:
+                          print(f'YAML ERROR: {path}: {e}')
+                          errors += 1
+          sys.exit(errors)
+          "
