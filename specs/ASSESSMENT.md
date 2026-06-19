@@ -89,11 +89,9 @@ The ARCHITECTURE.md lists these as "Conceptual Architecture (Future Source Layou
 
 **Gap:** No PARAM daemon that runs autonomously. No "wake and check" loop. No autonomous task discovery and execution.
 
-### 4. macOS Independent Operations — ⚠️ AVAILABLE BUT UNORCHESTRATED
+### 4. macOS Desktop Operations — REMOVED FROM ROADMAP
 
-**Current:** `hermes__computer_use` tool exists. Can capture screen, click, type, scroll.
-
-**Gap:** No PARAM-orchestrated workflows. No scheduled desktop automation tasks. No integration with PARAM's decision loop.
+**Decision:** macOS desktop automation phase removed per user directive. PARAM's primary runtime is NAS (Docker). MacBook is a worker node for OMO agent sessions — desktop automation is a capability available if needed, not a roadmap phase.
 
 ### 5. Kanban Workflow — ⚠️ AVAILABLE BUT UNCONFIGURED
 
@@ -113,13 +111,17 @@ The ARCHITECTURE.md lists these as "Conceptual Architecture (Future Source Layou
 
 **Gap:** Not configured. No remote dashboard access. No secure tunnel to PARAM.
 
-### 8. Multi-Channel Gateway — ⚠️ TELEGRAM ONLY
+### 8. Multi-Channel Gateway — ⚠️ TELEGRAM ONLY (with Cloudflare in v2)
 
-**Current:** Only Telegram enabled. Hermes supports 35 platforms.
+**Current:** Only Telegram enabled. Cloudflare tunnel on `*.aiforges.app` added in v2 roadmap for real-time access. Hermes supports 35 platforms.
 
 **Available but not configured:** Discord, Slack, WhatsApp, Signal, Matrix, Email, SMS, DingTalk, WeCom, Feishu, QQ Bot, Google Chat, Teams, Home Assistant, Webhook, API server.
 
 **Gap:** Single-channel. No multi-platform presence.
+
+### 9. Gitea Self-Hosted Git — REMOVED FROM ROADMAP
+
+**Decision:** Deferred to future per user directive. Not in current implementation plan.
 
 ### 9. Observability & Monitoring — ❌ MISSING
 
@@ -166,3 +168,21 @@ This document aligns with that honesty. PARAM has a solid foundation and a clear
 - Plugin system with lifecycle hooks
 
 PARAM currently uses ~35% of Hermes's available capabilities through the MCP bridge.
+
+---
+
+## Architecture Decisions (2026-06-18)
+
+Key decisions made after Reddit analysis and user direction:
+
+| Decision | Rationale |
+|----------|-----------|
+| **NAS as 24/7 runtime** | UGREEN NAS with Docker. Eliminates MacBook dependency for Telegram, cron, memory. |
+| **MacBook as worker node** | OMO/OpenCode sessions for complex code work. When off, NAS handles autonomously. |
+| **Cloudflare real-time Telegram** | Permanent tunnel on `*.aiforges.app`. Instant response, no inbound ports. |
+| **OMO agents > Hermes profiles** | 10 named agents + 8 categories + team_mode is superior to static 4-profile model. |
+| **TokenEye load balancing** | Already operational — balances two opencode-go accounts. Adding Nous free-tier. |
+| **No macOS desktop phase** | Removed per user directive. |
+| **No Gitea** | Deferred to future. |
+| **Three-layer memory** | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian (human-readable). |
+| **Skills whitelist** | Only load relevant skills per agent type. Immediate token savings. |
