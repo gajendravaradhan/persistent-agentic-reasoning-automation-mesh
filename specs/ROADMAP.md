@@ -212,9 +212,10 @@
   - **Verify:** Hindsight health check passes with pgvector connected
   - **Effort:** M
   - **Note:** Auto-managed by Hermes in local_embedded mode
-- [ ] **1.2.3** Verify Hindsight tools available to Hermes: retain, recall, reflect
+- [~] **1.2.3** Verify Hindsight tools available to Hermes: retain, recall, reflect
   - **Verify:** Hermes can call `hindsight_recall` and get relevant context
   - **Effort:** M
+  - **Note:** Hindsight config deployed (local_embedded). Tools NOT accessible because Honcho is the active memory provider — Hermes supports only one. Per Reddit architecture, Hindsight runs as a separate service (Docker container with pgvector), not as the Hermes memory provider. Vault→Hindsight sync cron will feed data in when Hindsight container is deployed.
 
 ### 1.3 Set Up Obsidian Vault (Human-Readable Knowledge)
 - [x] **1.3.1** Create Obsidian vault structure: Architecture/, Operations/, Research/, Meta/, Security/
