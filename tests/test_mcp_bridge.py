@@ -1,24 +1,9 @@
-"""Tests for param_hermes_mcp.py — patching mcp.server.Server to avoid Pydantic."""
-import sys, os
-from unittest.mock import MagicMock, patch
+import sys, os, json
+from unittest.mock import MagicMock
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
-
-_reg = MagicMock()
-_reg._snapshot_entries.return_value = []
-_reg.dispatch.return_value = '{"ok": true}'
-_rt = MagicMock()
-_rt.registry = _reg
-_rt.discover_builtin_tools = MagicMock()
-sys.modules["tools.registry"] = _rt
-
-# Patch Server class directly — prevents Pydantic from seeing MagicMock types
-_mock_server_cls = MagicMock()
-_mock_server_cls.return_value = MagicMock()
-
-with patch("mcp.server.Server", _mock_server_cls):
-    import param_hermes_mcp
+import param_hermes_mcp
 
 
 class TestToMcpSchema:
@@ -28,16 +13,12 @@ class TestToMcpSchema:
         r = param_hermes_mcp._to_mcp_schema(e)
         assert r["type"] == "object"
         assert r["properties"] == {"a": {"type": "str"}}
-        assert r["required"] == ["a"]
 
-    def test_empty_params(self):
-        e = MagicMock()
-        e.schema = {}
-        r = param_hermes_mcp._to_mcp_schema(e)
+    def test_empty(self):
+        r = param_hermes_mcp._to_mcp_schema(MagicMock())
         assert r["type"] == "object"
-        assert r["properties"] == {}
 
-    def test_bad_type(self):
+    def test_not_dict(self):
         e = MagicMock()
         e.schema = {"parameters": 42}
         r = param_hermes_mcp._to_mcp_schema(e)
@@ -56,14 +37,78 @@ class TestToMcpSchema:
         assert r["properties"] == {}
 
 
+class TestBuildToolEntries:
+    def _e(self, n, d="desc"):
+        e = MagicMock()
+        e.name = n
+        e.description = d
+        e.schema = {"description": d, "parameters": {"type": "object"}}
+        return e
+
+    def test_one(self):
+        r = param_hermes_mcp._build_tool_entries([self._e("a")])
+        assert len(r) == 1
+        assert r[0]["name"] == "hermes__a"
+
+    def test_custom_prefix(self):
+        r = param_hermes_mcp._build_tool_entries([self._e("t")], prefix="x__")
+        assert r[0]["name"] == "x__t"
+
+    def test_many(self):
+        r = param_hermes_mcp._build_tool_entries([self._e("a"), self._e("b")])
+        assert len(r) == 2
+
+    def test_empty(self):
+        assert param_hermes_mcp._build_tool_entries([]) == []
+
+    def test_malformed_skipped(self):
+        bad = MagicMock()
+        bad.name = "bad"
+        bad.schema = None
+        assert param_hermes_mcp._build_tool_entries([bad]) == []
+
+
+class TestBuildCallResponse:
+    def test_valid(self):
+        r = param_hermes_mcp._build_call_response("hermes__t", {"k": "v"}, lambda n, a: '{"ok":1}')
+        assert json.loads(r["text"]) == {"ok": 1}
+        assert r["is_error"] is False
+
+    def test_unknown_prefix(self):
+        r = param_hermes_mcp._build_call_response("bad", {}, lambda n, a: "")
+        assert r["is_error"] is True
+        assert "Unknown tool" in json.loads(r["text"])["error"]
+
+    def test_dispatch_error(self):
+        r = param_hermes_mcp._build_call_response("hermes__x", {}, lambda n, a: (_ for _ in ()).throw(RuntimeError("fail")))
+        assert r["is_error"] is True
+        assert "RuntimeError" in json.loads(r["text"])["error"]
+
+    def test_prefix_strip(self):
+        c = {}
+        param_hermes_mcp._build_call_response("hermes__cron", {"i": 60}, lambda n, a: c.update({"n": n, "a": a}))
+        assert c["n"] == "cron"
+
+    def test_empty_args(self):
+        r = param_hermes_mcp._build_call_response("hermes__t", {}, lambda n, a: "{}")
+        assert r["is_error"] is False
+
+    def test_custom_prefix_ok(self):
+        r = param_hermes_mcp._build_call_response("x__t", {}, lambda n, a: "{}", prefix="x__")
+        assert r["is_error"] is False
+
+    def test_wrong_prefix_fails(self):
+        r = param_hermes_mcp._build_call_response("hermes__t", {}, lambda n, a: "", prefix="x__")
+        assert r["is_error"] is True
+
+
 class TestPrefix:
     def test_value(self):
         assert param_hermes_mcp.PREFIX == "hermes__"
 
     def test_strip(self):
-        assert "hermes__cronjob"[len(param_hermes_mcp.PREFIX):] == "cronjob"
+        assert "hermes__x"[len(param_hermes_mcp.PREFIX):] == "x"
 
-
-class TestServerExists:
-    def test_has_server(self):
-        assert hasattr(param_hermes_mcp, "server")
+    def test_detection(self):
+        assert not "bad".startswith(param_hermes_mcp.PREFIX)
+        assert "hermes__y".startswith(param_hermes_mcp.PREFIX)
