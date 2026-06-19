@@ -9,29 +9,35 @@ Autonomous orchestration layer fusing Oh-My-OpenCode and Hermes Agent.
 ## Architecture
 
 ```
-                         ┌─────────────────────────┐
-                         │     Telegram / API      │
-                         │   (2-way agent surface) │
-                         └───────────┬─────────────┘
-                                     │
-                          ┌──────────▼──────────┐
-                          │     PARAM Core       │
-                          │  ┌────────────────┐  │
-                          │  │ Scheduler/Cron │  │
-                          │  ├────────────────┤  │
-                          │  │ Memory Engine  │  │
-                          │  ├────────────────┤  │
-                          │  │ Router & Auth  │  │
-                          │  └────────────────┘  │
-                          └──┬───────────────┬───┘
-                             │               │
-              ┌──────────────▼──┐   ┌────────▼──────────┐
-              │ Oh-My-OpenCode  │   │   Hermes Agent    │
-              │ (full MCP tools)│   │ (conversation/DM) │
-              └─────────────────┘   └───────────────────┘
+                      Telegram User
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────┐
+│  Cloudflare Tunnel (*.aiforges.app)                 │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│  UGREEN NAS (Docker, 24/7 always-on)               │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ Hermes Gateway: Telegram, cron, memory,     │   │
+│  │ kanban, skills                              │   │
+│  ├─────────────────────────────────────────────┤   │
+│  │ TokenEye: load-balanced LLM proxy + metrics │   │
+│  └─────────────────────────────────────────────┘   │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│  MacBook (worker node)                              │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ OpenCode + OMO Agents (10 agents, 8 cats)   │   │
+│  │ team_mode: 4 parallel, 8 max                │   │
+│  ├─────────────────────────────────────────────┤   │
+│  │ PARAM MCP Bridge: OMO ↔ Hermes tools        │   │
+│  └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
 ```
 
-PARAM sits between user-facing chat/API surfaces and agent runtimes, routing requests through a self-evolving memory layer and a proactive cron scheduler. Both Oh-My-OpenCode and Hermes Agent expose their full MCP tool surfaces to the mesh.
+PARAM runs 24/7 on NAS (Docker). Telegram messages handled instantly regardless of MacBook state. Complex code tasks delegated to OMO agents when MacBook is active.
 
 ---
 
@@ -42,40 +48,48 @@ PARAM sits between user-facing chat/API surfaces and agent runtimes, routing req
 git clone https://github.com/gajendravaradhan/persistent-agentic-reasoning-automation-mesh.git
 cd persistent-agentic-reasoning-automation-mesh
 
-# Configure Hermes/PARAM
+# Option A: Local Hermes (MacBook only, needs active session)
 cp configs/hermes-env.tmpl ~/.hermes/.env
 chmod 600 ~/.hermes/.env
-# Add TELEGRAM_BOT_TOKEN from @BotFather and TELEGRAM_ALLOWED_USERS.
-# Provider routing is in configs/hermes-config.yaml.tmpl; default routes via TokenEye/OpenCode Go.
-
-# Check status
 ./scripts/param-status.sh
+
+# Option B: NAS 24/7 deployment (recommended)
+cd deploy/nas
+./deploy.sh prepare
+# Edit hermes-data/.env with TELEGRAM_BOT_TOKEN and provider keys
+HERMES_UID=$(id -u) HERMES_GID=$(id -g) ./deploy.sh start
+./cloudflared-setup.sh  # For remote access via *.aiforges.app
 ```
 
-PARAM requires a running Hermes Agent instance and an Oh-My-OpenCode session. See [specs/](specs/) for detailed setup guides.
+PARAM requires a running Hermes Agent instance (local or NAS) and an Oh-My-OpenCode session for complex code work. For 24/7 Telegram availability, deploy to NAS. See [specs/ROADMAP.md](specs/ROADMAP.md) for the full implementation plan.
 
 ---
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **2-way Telegram bridge** | Send and receive messages through a dedicated Telegram bot. PARAM can be triggered by DM, respond directly, and push proactive notifications. |
-| **Generic provider routing** | Configure any Hermes provider or OpenAI-compatible proxy in `model.*`. Default template routes through TokenEye/OpenCode Go so token usage is sniffed and recorded. |
-| **Self-evolving memory** | Interactions are indexed and stored. The memory engine surfaces relevant context from past exchanges automatically. |
-| **Proactive cron** | Scheduled tasks fire on configurable intervals. PARAM checks conditions, runs actions, and reports results without being asked. |
-| **Full MCP tool surface** | All Model Context Protocol tools from both Oh-My-OpenCode and Hermes Agent are available through a unified router. |
-| **Multi-agent routing** | Requests are dispatched to the appropriate agent based on intent classification. |
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **2-way Telegram bridge** | ✅ Working | 24/7 Telegram bot via Hermes gateway long-polling. Proven: messages received, processed, responded. |
+| **TokenEye proxy** | ✅ Working | Load-balanced LLM proxy with 2 opencode-go accounts. Pass-through for Claude Pro + ChatGPT Plus. 197+ requests tracked. |
+| **MCP bridge** | ✅ Working | 111-line Python bridge exposing 64 Hermes tools to OMO via `hermes__` prefix. |
+| **OMO agent pool** | ✅ Working | 10 specialized agents + 8 categories. team_mode: 4 parallel, 8 max. Model + fallback chains per agent. |
+| **Cron automation** | ✅ Working | 5 active cron jobs. Telegram-delivered results. |
+| **3-layer memory** | 🔧 Planned | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian (human). Phase 1. |
+| **Self-evolving skills** | 🔧 Planned | Automated skill creation from task outcomes, failure-driven improvement. Phase 2. |
+| **NAS 24/7 deployment** | 🔧 Planned | Docker Compose on UGREEN NAS with Cloudflare tunnel. Phase 0. |
+| **Multi-channel gateway** | 🔧 Planned | Discord, Email, Webhook beyond Telegram. Phase 5. |
+
+See [specs/ASSESSMENT.md](specs/ASSESSMENT.md) for the honest gap analysis and [specs/ROADMAP.md](specs/ROADMAP.md) for the 82-task implementation plan.
 
 ---
 
 ## Requirements
 
-- **Python**: 3.11+ for Hermes Agent integration
-- **Hermes Agent**: running instance with MCP server enabled
-- **Oh-My-OpenCode**: configured with your API keys and MCP tools
+- **Hermes Agent**: running instance (local or NAS Docker)
+- **Oh-My-OpenCode**: configured OpenCode session with OMO plugin
 - **Telegram Bot**: token from @BotFather for the primary chat surface
-- **OS**: macOS primary; Linux supported for unattended runtime
+- **For 24/7**: UGREEN NAS (or any Docker host) + Cloudflare domain for tunnel
+- **Python**: 3.11+ (for MCP bridge)
 
 ---
 
@@ -97,11 +111,10 @@ persistent-agentic-reasoning-automation-mesh/
 
 ## Documentation
 
-Detailed specifications live in the [specs/](specs/) directory:
-
 - [Assessment](specs/ASSESSMENT.md) — honest gap analysis of current vs planned capabilities
-- [Roadmap](specs/ROADMAP.md) — implementation plan with 99-task checklist across 12 phases
+- [Roadmap](specs/ROADMAP.md) — 82-task implementation plan across 10 phases
 - [Architecture](specs/ARCHITECTURE.md) — system design, data flow, component interactions
+- [Reddit Analysis](specs/REDDIT-ANALYSIS.md) — patterns from production Hermes setups
 - [Extensions](specs/EXTENSIONS.md) — MCP and future integration model
 - [Troubleshooting](specs/TROUBLESHOOTING.md) — operational checks and fixes
 
