@@ -357,12 +357,22 @@
 > Beyond Telegram — activate additional Hermes gateway platforms.
 
 ### 5.1 Discord Gateway
-- [ ] **5.1.1** Configure Discord bot and add to Hermes gateway config
+- [x] **5.1.1** Configure Discord bot and add to Hermes gateway config
   - **Verify:** PARAM reachable via Discord DM
   - **Effort:** M
-- [ ] **5.1.2** Implement cross-platform context: same memory, different channel
+  - **Note:** Discord platform enabled, bot token configured. 2 platforms active (Telegram + Discord).
+- [x] **5.2.1** Configure Hermes webhook platform
+  - **Verify:** External POST triggers Hermes agent execution
+  - **Effort:** M
+  - **Note:** Webhook enabled at hook.param.aiforges.app/webhook with WEBHOOK_SECRET auth.
+- [x] **5.2.2** Implement GitHub → PARAM webhook: PR opened → auto-review
+  - **Verify:** New PR triggers automated code review
+  - **Effort:** M
+  - **Note:** GitHub webhook configured. Tunnel route hook.param.aiforges.app → webhook endpoint.
+- [x] **5.1.2** Implement cross-platform context: same memory, different channel
   - **Verify:** Memory from Telegram session available in Discord session
   - **Effort:** M
+  - **Note:** Honcho memory provider (self-hosted) shared across all platforms. Same MEMORY.md injected regardless of channel.
 
 ### 5.2 Webhook Gateway for External Services
 - [ ] **5.2.1** Configure Hermes webhook platform
@@ -499,7 +509,7 @@
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
 | 3: Autonomous NAS Ops | 5 | 10 | 50% |
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
-| 5: Multi-Channel Gateway | 0 | 4 | 0% |
+| 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 0 | 8 | 0% |
 | 7: Observability | 0 | 4 | 0% |
 | 8: Testing & CI/CD | 0 | 5 | 0% |
