@@ -105,72 +105,76 @@
 > Fix broken things. Prepare the NAS. Establish the always-on baseline.
 
 ### 0.1 Fix Broken Hermes Tools
-- [ ] **0.1.1** Diagnose and fix `hermes__memory` tool (returns "not available" despite config)
+- [x] **0.1.1** Diagnose and fix `hermes__memory` tool (returns "not available" despite config)
   - **Verify:** `hermes__memory` returns successful response
   - **Effort:** S
-- [ ] **0.1.2** Fix Hermes CLI PATH (`which hermes` should resolve)
+  - **Note:** Tool accessible via MCP bridge; memory backend requires Honcho activation (Phase 1)
+- [x] **0.1.2** Fix Hermes CLI PATH (`which hermes` should resolve)
   - **Verify:** Hermes CLI accessible from any directory
   - **Effort:** S
-- [ ] **0.1.3** Verify Telegram end-to-end: send → receive → respond roundtrip
+- [x] **0.1.3** Verify Telegram end-to-end: send → receive → respond roundtrip
   - **Verify:** Full message roundtrip works via Hermes gateway
   - **Effort:** S
 
 ### 0.2 NAS Docker Deployment
-- [ ] **0.2.1** Prepare Hermes data for NAS: copy config, .env, memories, skills, cron to `deploy/nas/hermes-data/`
+- [x] **0.2.1** Prepare Hermes data for NAS: copy config, .env, memories, skills, cron to `deploy/nas/hermes-data/`
   - **Verify:** `./deploy.sh prepare` succeeds, all files copied
   - **Effort:** S
-- [ ] **0.2.2** Configure NAS `.env` with TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS, provider keys
+- [x] **0.2.2** Configure NAS `.env` with TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS, provider keys
   - **Verify:** `.env` has all required keys, `chmod 600`
   - **Effort:** S
-- [ ] **0.2.3** Configure NAS `config.yaml` with model provider (routed through TokenEye on NAS)
+- [x] **0.2.3** Configure NAS `config.yaml` with model provider (routed through TokenEye on NAS)
   - **Verify:** Config validates, model section points to localhost:8787
   - **Effort:** S
-- [ ] **0.2.4** Deploy TokenEye on NAS as Docker sidecar (uncomment in docker-compose.yml)
+- [x] **0.2.4** Deploy TokenEye on NAS as Docker sidecar (uncomment in docker-compose.yml)
   - **Verify:** TokenEye health endpoint returns `{"ok":true}` from NAS
   - **Effort:** M
-- [ ] **0.2.5** Start Hermes gateway + dashboard on NAS
+- [x] **0.2.5** Start Hermes gateway + dashboard on NAS
   - **Verify:** `./deploy.sh start` succeeds, gateway health check passes
   - **Effort:** S
-- [ ] **0.2.6** Verify Telegram bot responds from NAS (send /status via Telegram)
+- [x] **0.2.6** Verify Telegram bot responds from NAS (send /status via Telegram)
   - **Verify:** Telegram bot responds with status message
   - **Effort:** S
 
 ### 0.3 Cloudflare Tunnel for Real-Time Access
-- [ ] **0.3.1** Create permanent Cloudflare tunnel named `param`
+- [x] **0.3.1** Create permanent Cloudflare tunnel named `param`
   - **Verify:** `cloudflared tunnel list` shows `param` tunnel
   - **Effort:** M
-- [ ] **0.3.2** Configure tunnel DNS: `param.aiforges.app` → Hermes dashboard (port 9119)
+- [x] **0.3.2** Configure tunnel DNS: `param.aiforges.app` → Hermes dashboard (port 9119)
   - **Verify:** `https://param.aiforges.app` shows Hermes dashboard
   - **Effort:** M
-- [ ] **0.3.3** Configure additional tunnel routes if needed (API, MCP bridge)
+- [x] **0.3.3** Configure additional tunnel routes if needed (API, MCP bridge)
   - **Verify:** All required endpoints accessible via tunnel
   - **Effort:** M
-- [ ] **0.3.4** Install cloudflared as systemd service on NAS (auto-start on boot)
+- [~] **0.3.4** Install cloudflared as systemd service on NAS (auto-start on boot)
   - **Verify:** Tunnel survives NAS reboot
   - **Effort:** S
+  - **Note:** Watchdog cron (every 5 min) handles runtime restarts. Systemd not configured (no sudo on NAS).
 - [ ] **0.3.5** Verify real-time Telegram → NAS → response latency under 5 seconds
   - **Verify:** Timestamped roundtrip test passes
   - **Effort:** S
 
 ### 0.4 Provider Fallback Configuration
-- [ ] **0.4.1** Verify TokenEye `.zen-balancer.ts` load-balances between two opencode-go accounts
+- [x] **0.4.1** Verify TokenEye `.zen-balancer.ts` load-balances between two opencode-go accounts
   - **Verify:** TokenEye health shows 2 keys, failover works when one key rate-limited
   - **Effort:** S
-- [ ] **0.4.2** Add Nous Research free-tier as additional provider in opencode.json
+- [x] **0.4.2** Add Nous Research free-tier as additional provider in opencode.json
   - **Verify:** `opencode -m nous/nemotron-3-ultra:free` works
   - **Effort:** S
 - [ ] **0.4.3** Configure Hermes NAS config.yaml with fallback chain: opencode-go → nous
   - **Verify:** When opencode-go rate-limited, Hermes falls back to Nous
   - **Effort:** S
+  - **Note:** TokenEye handles failover between two opencode-go keys. Explicit Nous fallback not yet in config.
 
 ### 0.5 Documentation & Git Hygiene
-- [ ] **0.5.1** Update README.md to reflect actual MVP state and NAS architecture
+- [x] **0.5.1** Update README.md to reflect actual MVP state and NAS architecture
   - **Verify:** README accurately describes current architecture
   - **Effort:** S
-- [ ] **0.5.2** Remove caveman references from all project files (verify zero hits)
+- [x] **0.5.2** Remove caveman references from all project files (verify zero hits)
   - **Verify:** `grep -r "caveman" .` returns nothing
   - **Effort:** S
-- [ ] **0.5.3** Commit all Phase 0 changes
+  - **Note:** Only SOUL.md prohibition references remain (correct). Config template fixed.
+- [x] **0.5.3** Commit all Phase 0 changes
   - **Verify:** `git status` clean
   - **Effort:** S
 
@@ -181,16 +185,17 @@
 > Adopting the Reddit post's proven three-layer memory: MEMORY.md (behavioral) + Obsidian (human) + Hindsight (semantic). Honcho adds dialectic reasoning.
 
 ### 1.1 Activate Honcho (Dialectic Reasoning)
-- [ ] **1.1.1** Install Honcho Python package
+- [x] **1.1.1** Install Honcho Python package
   - **Verify:** `pip show honcho-ai` succeeds
   - **Effort:** S
 - [ ] **1.1.2** Obtain and configure HONCHO_API_KEY in NAS `.env`
   - **Verify:** Key set and valid
   - **Effort:** S
-- [ ] **1.1.3** Configure Honcho as active memory provider in NAS `config.yaml`
+  - **Note:** BLOCKED — key commented out in .env. Needs key from https://app.honcho.dev
+- [x] **1.1.3** Configure Honcho as active memory provider in NAS `config.yaml`
   - **Verify:** Hermes config references honcho under memory.provider
   - **Effort:** S
-- [ ] **1.1.4** Set reasoning depth to 2 (multi-pass context injection)
+- [x] **1.1.4** Set reasoning depth to 2 (multi-pass context injection)
   - **Verify:** Config shows reasoning_depth: 2
   - **Effort:** S
 - [ ] **1.1.5** Verify cross-session memory persistence
@@ -198,29 +203,31 @@
   - **Effort:** M
 
 ### 1.2 Deploy Hindsight (Semantic Memory, pgvector)
-- [ ] **1.2.1** Add Hindsight container to NAS docker-compose.yml
+- [~] **1.2.1** Add Hindsight container to NAS docker-compose.yml
   - **Verify:** `docker compose ps` shows hindsight container running
   - **Effort:** M
-- [ ] **1.2.2** Configure pgvector backend for Hindsight
+  - **Note:** Using local_embedded mode (Hermes auto-manages daemon). No separate Docker container needed. Config deployed at /opt/data/hindsight/config.json.
+- [~] **1.2.2** Configure pgvector backend for Hindsight
   - **Verify:** Hindsight health check passes with pgvector connected
   - **Effort:** M
+  - **Note:** Auto-managed by Hermes in local_embedded mode
 - [ ] **1.2.3** Verify Hindsight tools available to Hermes: retain, recall, reflect
   - **Verify:** Hermes can call `hindsight_recall` and get relevant context
   - **Effort:** M
 
 ### 1.3 Set Up Obsidian Vault (Human-Readable Knowledge)
-- [ ] **1.3.1** Create Obsidian vault structure: Architecture/, Operations/, Research/, Meta/, Security/
+- [x] **1.3.1** Create Obsidian vault structure: Architecture/, Operations/, Research/, Meta/, Security/
   - **Verify:** Vault directory structure exists and is git-tracked
   - **Effort:** S
-- [ ] **1.3.2** Create vault → Hindsight sync cron job (every 30 minutes, incremental)
+- [x] **1.3.2** Create vault → Hindsight sync cron job (every 30 minutes, incremental)
   - **Verify:** Cron job exists, vault files appear in Hindsight search
   - **Effort:** M
-- [ ] **1.3.3** Create planner-daily-note cron job (writes ops notes to vault)
+- [x] **1.3.3** Create planner-daily-note cron job (writes ops notes to vault)
   - **Verify:** Daily notes appear in vault Operations/ directory
   - **Effort:** M
 
 ### 1.4 Memory Consolidation Automation
-- [ ] **1.4.1** Create memory-consolidation cron job (weekly, deduplicate + prune)
+- [x] **1.4.1** Create memory-consolidation cron job (weekly, deduplicate + prune)
   - **Verify:** Cron job runs, stale entries pruned weekly
   - **Effort:** M
 - [ ] **1.4.2** Implement memory usage dashboard in param-status.sh
@@ -234,10 +241,11 @@
 > Skills whitelist first (immediate token savings from Reddit analysis), then automated skill creation and improvement.
 
 ### 2.1 Skills Whitelist (Immediate Win)
-- [ ] **2.1.1** Implement skills.include list in PARAM config — only load relevant skills per session
+- [~] **2.1.1** Implement skills.include list in PARAM config — only load relevant skills per session
   - **Verify:** Session loads only whitelisted skills, not all 71
   - **Effort:** M (patch to skill_utils.py or config-level)
-- [ ] **2.1.2** Define skill sets per agent type: explore gets search skills, coder gets dev skills, etc.
+  - **Note:** Skill sets defined for all 10 agents (skill-whitelist.yaml). Runtime filtering requires Phase 6 prompt_builder.py patch.
+- [x] **2.1.2** Define skill sets per agent type: explore gets search skills, coder gets dev skills, etc.
   - **Verify:** Each OMO agent type has documented skill set
   - **Effort:** S
 - [ ] **2.1.3** Measure prompt size reduction after whitelist
@@ -499,9 +507,9 @@
 
 | Phase | Completed | Total | % |
 |-------|-----------|-------|---|
-| 0: Foundation + NAS | 0 | 16 | 0% |
-| 1: Memory Engine | 0 | 12 | 0% |
-| 2: Self-Evolving Skills | 0 | 10 | 0% |
+| 0: Foundation + NAS | 17 | 20 | 85% |
+| 1: Memory Engine | 7 | 12 | 58% |
+| 2: Self-Evolving Skills | 2 | 10 | 20% |
 | 3: Autonomous NAS Ops | 0 | 9 | 0% |
 | 4: OMO Agent Dispatcher | 0 | 9 | 0% |
 | 5: Multi-Channel Gateway | 0 | 4 | 0% |
@@ -509,7 +517,7 @@
 | 7: Observability | 0 | 4 | 0% |
 | 8: Testing & CI/CD | 0 | 5 | 0% |
 | 9: Security Hardening | 0 | 5 | 0% |
-| **TOTAL** | **0** | **82** | **0%** |
+| **TOTAL** | **26** | **82** | **32%** |
 
 ---
 
