@@ -1,9 +1,9 @@
 model:
-  default: kimi-k2.6
-  provider: opencode-go
-  base_url: http://127.0.0.1:8787/zen/go/v1
+  default: nemotron-3-ultra
+  provider: nous
+  base_url: https://api.nousresearch.com/v1
   default_headers:
-    User-Agent: curl/8.7.1
+    User-Agent: PARAM/1.0
     Accept: application/json
 terminal:
   backend: local
@@ -169,7 +169,8 @@ cron:
     enabled: true
   - name: memory-consolidation
     schedule: 0 2 * * 0
-    prompt: Review and consolidate PARAM memories via Honcho. Remove stale entries (>30
+    prompt: >
+      Review and consolidate PARAM memories via Honcho. Remove stale entries (>30
       days no recall), deduplicate semantically similar memories, organize by category.
       Keep MEMORY.md under 2200 chars. Report what was pruned.
     skills: []
@@ -181,14 +182,16 @@ cron:
     enabled: true
   - name: vault-hindsight-sync
     schedule: '*/30 * * * *'
-    prompt: Incrementally sync the PARAM Obsidian vault at /workspace/vault/ to Hindsight.
+    prompt: >
+      Incrementally sync the PARAM Obsidian vault at /workspace/vault/ to Hindsight.
       Use mtime-based detection. Only ingest files changed since last sync. 90-second
       wall budget. Report files synced or skip if no changes.
     skills: []
     enabled: false
   - name: planner-daily-note
     schedule: 0 22 * * *
-    prompt: Write a daily operations note to the PARAM vault at Operations/YYYY-MM-DD.md.
+    prompt: >
+      Write a daily operations note to the PARAM vault at Operations/YYYY-MM-DD.md.
       Include: tasks completed today, sessions run, errors encountered, decisions
       made, memory growth, token usage. Keep concise and factual.
     skills: []
