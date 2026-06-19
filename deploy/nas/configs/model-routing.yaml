@@ -1,0 +1,49 @@
+# =============================================================================
+# Model Provider Routing — NAS Docker
+# =============================================================================
+# Merge into hermes-data/config.yaml under the `model:` key.
+# Pick ONE of the sections below and replace the model block.
+# =============================================================================
+
+# --- Option A: OpenRouter (recommended) ---
+# Works out of the box. Get key at openrouter.ai, put in .env.
+model:
+  provider: openrouter
+  default: anthropic/claude-sonnet-4-20250514
+  base_url: https://openrouter.ai/api/v1
+
+# --- Option B: Anthropic Direct ---
+# model:
+#   provider: anthropic
+#   default: claude-sonnet-4-20250514
+
+# --- Option C: OpenAI Direct ---
+# model:
+#   provider: openai
+#   default: gpt-4o
+
+# --- Option D: TokenEye on NAS ---
+# Requires: tokeneye service running (uncomment in docker-compose.yml).
+# model:
+#   provider: opencode-go
+#   default: kimi-k2.6
+#   base_url: http://127.0.0.1:8787/zen/go/v1
+#   default_headers:
+#     User-Agent: curl/8.7.1
+#     Accept: application/json
+
+# --- Memory: Self-Learning ---
+# Add this block. Pick one provider, set API key in .env.
+# memory:
+#   provider: mem0          # or: honcho, supermemory, byterover, etc.
+#   memory_enabled: true
+#   user_profile_enabled: true
+#   memory_char_limit: 2200
+#   user_char_limit: 1375
+
+# --- Cron: already configured ---
+# Jobs are managed via `hermes cron` CLI in the running container.
+# Current jobs (transferred from Mac):
+#   - 30m heartbeat (param-status.sh → Telegram)
+#   - 6h status watchdog (param-status.sh → Telegram)
+#   - 9am daily check-in (LLM agent → Telegram)
