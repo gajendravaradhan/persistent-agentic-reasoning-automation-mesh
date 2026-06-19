@@ -196,6 +196,11 @@ cron:
       made, memory growth, token usage. Keep concise and factual.
     skills: []
     enabled: false
+  - name: tunnel-watchdog
+    schedule: '*/5 * * * *'
+    script: cloudflared-watchdog.sh
+    no_agent: true
+    enabled: true
 onboarding:
   seen:
     profile_build_offered: true

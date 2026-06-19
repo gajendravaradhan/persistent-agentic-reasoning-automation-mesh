@@ -4,81 +4,20 @@
 # Target: Ugreen NAS with Docker Compose
 # Image:  nousresearch/hermes-agent:latest (public Docker Hub)
 #
-# Usage:
-#   1. ./deploy.sh prepare    — copy configs from ~/.hermes to ./hermes-data/
-#   2. ./deploy.sh start      — pull image + start containers
-#   3. ./deploy.sh logs       — tail gateway logs
-#   4. ./deploy.sh stop       — stop containers
-#
-# Cloudflare Tunnel (optional, for dashboard remote access):
-#   ./cloudflared-setup.sh
-#
+# Single container runs both gateway + dashboard via s6 supervision.
+# Cloudflared runs natively (not in Docker — simpler, fewer path issues).
 
 services:
-  # ------------------------------------------------------------------
-  # Hermes Gateway — the main agent runtime
-  # ------------------------------------------------------------------
-  gateway:
+  # Hermes — single container for gateway + dashboard
+  hermes:
     image: nousresearch/hermes-agent:latest
-    container_name: param-gateway
+    container_name: param
     restart: unless-stopped
     network_mode: host
     volumes:
       - ./hermes-data:/opt/data
+      - ./hermes-data/scripts:/opt/data/scripts
     environment:
       - HERMES_UID=${HERMES_UID:-1000}
       - HERMES_GID=${HERMES_GID:-1000}
-      # Telegram webhook NOT supported by Hermes (uses long-polling).
-      # No inbound port needed — bot polls Telegram API directly.
     command: ["gateway", "run"]
-
-  # ------------------------------------------------------------------
-  # Hermes Dashboard — web UI (internal only by default)
-  # ------------------------------------------------------------------
-  dashboard:
-    image: nousresearch/hermes-agent:latest
-    container_name: param-dashboard
-    restart: unless-stopped
-    network_mode: host
-    depends_on:
-      - gateway
-    volumes:
-      - ./hermes-data:/opt/data
-    environment:
-      - HERMES_UID=${HERMES_UID:-1000}
-      - HERMES_GID=${HERMES_GID:-1000}
-    # Dashboard bound to localhost:9119. For remote access, use
-    # Cloudflare Tunnel or SSH port forwarding:
-    #   ssh -L 9119:localhost:9119 user@nas
-    command: ["dashboard", "--host", "0.0.0.0", "--insecure", "--no-open"]
-
-  # ------------------------------------------------------------------
-  # Cloudflare Tunnel — secure remote access via *.aiforges.app
-  # ------------------------------------------------------------------
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: param-cloudflared
-    restart: unless-stopped
-    network_mode: host
-    depends_on:
-      - dashboard
-    volumes:
-      - /home/Nasama-Pochu/.cloudflared:/home/nonroot/.cloudflared
-    command: tunnel run param
-
-  # ------------------------------------------------------------------
-  # TokenEye — local model proxy (optional)
-  # ------------------------------------------------------------------
-  # Uncomment this block if you want TokenEye on the NAS.
-  # Requires: bun installed on NAS, TokenEye cloned at ./tokeneye/
-  #
-  # tokeneye:
-  #   image: oven/bun:latest
-  #   container_name: param-tokeneye
-  #   restart: unless-stopped
-  #   network_mode: host
-  #   working_dir: /app
-  #   volumes:
-  #     - ./tokeneye:/app
-  #     - ./tokeneye-config:/root/.config/tokeneye
-  #   command: ["bun", "run", "src/index.ts"]
