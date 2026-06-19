@@ -8,16 +8,17 @@
 
 ## Architectural Decisions (User-Directed)
 
-| Decision | Rationale |
-|----------|-----------|
-| **NAS as 24/7 runtime** | UGREEN NAS with Docker. Eliminates MacBook dependency. Hermes gateway + TokenEye + cron + memory run on NAS perpetually. |
-| **MacBook as worker node** | MacBook hosts OMO/OpenCode sessions for complex code work. When off, NAS handles Telegram messages autonomously. When on, OMO agents execute delegated tasks. |
-| **Cloudflare real-time Telegram** | Cloudflare Tunnel on `*.aiforges.app` domain. Hermes long-polls Telegram API from NAS. No inbound ports needed. |
-| **OMO agents > Hermes profiles** | OMO's 10 agents + 8 categories + team_mode (4 parallel, 8 max) is superior to Hermes's static 4-profile model. No multi-profile architecture needed. |
-| **TokenEye load balancing** | `.zen-balancer.ts` already provides failover between two opencode-go accounts. Add Nous free-tier as additional fallback. |
-| **No macOS desktop phase** | Explicitly removed per user directive. |
-| **No Gitea** | Deferred to future. Not in current roadmap. |
-| **Honcho + Hindsight memory** | Honcho for dialectic reasoning, Hindsight/pgvector for semantic recall, Obsidian vault for human-readable knowledge. Three-layer architecture from Reddit analysis. |
+| ID | Decision | Rationale |
+|----|----------|-----------|
+| **D1** | NAS as 24/7 runtime | UGREEN NAS with Docker. Eliminates MacBook dependency. MacBook becomes worker node for OMO sessions. |
+| **D2** | Cloudflare real-time Telegram | Permanent tunnel on `*.aiforges.app`. Instant Telegram response via NAS. No inbound ports. |
+| **D3** | OMO agents > Hermes profiles | 10 agents + 8 categories + team_mode (4 parallel, 8 max) is superior to static 4-profile model. |
+| **D4** | TokenEye load balancing | Already operational — balances two opencode-go accounts. Nous free-tier added as fallback. |
+| **D5** | No macOS desktop phase | Removed per user directive. |
+| **D6** | No Gitea | Deferred to future. Not in current roadmap. |
+| **D7** | Three-layer memory | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian vault (human-readable). |
+| **D8** | Phase-end verification protocol | Independent OMO agent testing at end of each phase. Telegram status report for user approval. No "done" without verification + approval. |
+| **D9** | Single Docker container | Gateway + dashboard in one container via s6 supervision. Prevents Telegram polling conflicts.
 
 ---
 
