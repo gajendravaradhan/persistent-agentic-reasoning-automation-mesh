@@ -6,8 +6,9 @@
 # by cloudflared-setup.sh. Do not edit on NAS directly —
 # it is managed from the PARAM repo.
 
-tunnel: param
-credentials-file: /root/.cloudflared/param.json
+tunnel: 9be6d675-748b-490f-9111-43d7cbd66958
+credentials-file: /home/nonroot/.cloudflared/9be6d675-748b-490f-9111-43d7cbd66958.json
+origin-cert: /home/nonroot/.cloudflared/cert.pem
 
 ingress:
   # PARAM Hermes Dashboard

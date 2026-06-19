@@ -53,6 +53,20 @@ services:
     command: ["dashboard", "--host", "0.0.0.0", "--insecure", "--no-open"]
 
   # ------------------------------------------------------------------
+  # Cloudflare Tunnel — secure remote access via *.aiforges.app
+  # ------------------------------------------------------------------
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: param-cloudflared
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - dashboard
+    volumes:
+      - /home/Nasama-Pochu/.cloudflared:/home/nonroot/.cloudflared
+    command: tunnel run param
+
+  # ------------------------------------------------------------------
   # TokenEye — local model proxy (optional)
   # ------------------------------------------------------------------
   # Uncomment this block if you want TokenEye on the NAS.
