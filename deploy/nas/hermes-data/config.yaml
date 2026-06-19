@@ -278,6 +278,24 @@ cron:
       Apply cooldown rules. Deliver via Telegram if actionable.'
     schedule: '*/5 * * * *'
     skills: []
+  - enabled: true
+    name: kanban-flowkeeper
+    prompt: Review kanban board. Clear orphaned tasks. Propagate unblock chains. Flag
+      stalled tasks. Report changes.
+    schedule: '*/30 * * * *'
+    skills: []
+  - enabled: true
+    name: kanban-post-work-audit
+    prompt: Audit tasks completed in last 2 hours. Verify acceptance criteria. Flag
+      failures.
+    schedule: '*/30 * * * *'
+    skills: []
+  - enabled: true
+    name: inference-live-probe
+    prompt: Run a completion on every provider via TokenEye. Verify validity. Alert
+      on failure.
+    schedule: 0 */4 * * *
+    skills: []
   max_parallel_jobs: null
   tick_interval_seconds: 60
   wrap_response: true

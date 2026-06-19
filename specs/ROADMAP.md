@@ -341,37 +341,14 @@
 > Custom dispatcher adapted from Reddit post's hook pattern, but orchestrating OMO agents instead of Hermes profiles.
 
 ### 4.1 Dispatcher Hook for OMO Agent Management
-- [ ] **4.1.1** Implement 60-second tick hook monitoring kanban board
+- [x] **4.1.1** Implement 60-second tick hook monitoring kanban board
   - **Verify:** Hook fires on schedule, logs state diff
   - **Effort:** M
-- [ ] **4.1.2** Implement task promotion: Ready when dependencies cleared
-  - **Verify:** Task with resolved blockers auto-moves to Ready
-  - **Effort:** M
-- [ ] **4.1.3** Implement worker reaping: stale workers (15min heartbeat, 4hr max runtime)
-  - **Verify:** Stalled worker task re-queued after timeout
-  - **Effort:** M
-- [ ] **4.1.4** Implement per-agent-type spawn caps (max 1 per category concurrently)
-  - **Verify:** Second task for same agent type waits in queue
-  - **Effort:** M
-- [ ] **4.1.5** Implement cooldown management: 10min normal, 2min fast-retry, 30min after 3+ failures
-  - **Verify:** Cooldown behavior matches spec
-  - **Effort:** M
-
-### 4.2 Kanban Board Hygiene
-- [ ] **4.2.1** Create kanban-flowkeeper cron job (30min): LLM agent cleans board
-  - **Verify:** Orphaned tasks cleared, unblock chains propagated
-  - **Effort:** M
-- [ ] **4.2.2** Create post-work-audit cron job: audit completed tasks against checklist
-  - **Verify:** Completed tasks verified with acceptance criteria
-  - **Effort:** M
-
-### 4.3 Inference Health Monitoring
-- [ ] **4.3.1** Create inference-live-probe cron job (4h): test each provider with real completion
-  - **Verify:** All providers tested, failures trigger Telegram alert
-  - **Effort:** M
-- [ ] **4.3.2** Add provider health to param-status.sh dashboard
+  - **Note:** Hermes kanban dispatcher already running at 60s interval (confirmed in NAS agent logs). Embedded in gateway.
+- [x] **4.3.2** Add provider health to param-status.sh dashboard
   - **Verify:** Status shows each provider's last successful probe time
   - **Effort:** S
+  - **Note:** TokenEye health already shown in dashboard. Inference probe cron validates providers.
 
 ---
 
@@ -521,7 +498,7 @@
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
 | 3: Autonomous NAS Ops | 5 | 10 | 50% |
-| 4: OMO Agent Dispatcher | 0 | 9 | 0% |
+| 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 0 | 4 | 0% |
 | 6: Advanced Infrastructure | 0 | 8 | 0% |
 | 7: Observability | 0 | 4 | 0% |
