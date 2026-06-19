@@ -1,7 +1,7 @@
 model:
-  default: nemotron-3-ultra
-  provider: nous
-  base_url: https://api.nousresearch.com/v1
+  default: kimi-k2.6
+  provider: opencode-go
+  base_url: http://127.0.0.1:8787/zen/go/v1
   default_headers:
     User-Agent: PARAM/1.0
     Accept: application/json

@@ -8,7 +8,17 @@
 # Cloudflared runs natively (not in Docker — simpler, fewer path issues).
 
 services:
-  # Hermes — single container for gateway + dashboard
+  # TokenEye — LLM proxy with load balancing between opencode-go accounts
+  tokeneye:
+    image: oven/bun:latest
+    container_name: param-tokeneye
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /app
+    volumes:
+      - /home/Nasama-Pochu/param/tokeneye:/app-src:ro
+      - /home/Nasama-Pochu/param/tokeneye-config:/root/.config/tokeneye
+    command: ["sh", "-c", "mkdir -p /app/work && cp /app-src/* /app/work/ 2>/dev/null; cd /app/work && bun install && exec bun run src/index.ts"]
   hermes:
     image: nousresearch/hermes-agent:latest
     container_name: param
