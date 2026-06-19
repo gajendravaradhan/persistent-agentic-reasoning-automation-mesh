@@ -23,3 +23,8 @@ __pycache__/
 .certs/
 .coverage
 param_hermes_mcp.py,cover
+# Security — NEVER commit these
+deploy/nas/hermes-data/.env
+deploy/nas/hermes-data/sessions/
+.certs/
+*.pem

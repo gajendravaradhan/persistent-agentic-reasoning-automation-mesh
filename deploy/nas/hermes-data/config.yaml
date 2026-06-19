@@ -554,7 +554,7 @@ plugins:
   enabled: []
 prefill_messages_file: ''
 privacy:
-  redact_pii: false
+  redact_pii: true
 prompt_caching:
   cache_ttl: 5m
 providers: {}
@@ -574,7 +574,7 @@ security:
   allow_private_urls: false
   redact_secrets: true
   tirith_enabled: true
-  tirith_fail_open: true
+  tirith_fail_open: false
   tirith_path: tirith
   tirith_timeout: 5
   website_blocklist:
@@ -663,7 +663,7 @@ tool_loop_guardrails:
     exact_failure: 5
     idempotent_no_progress: 5
     same_tool_failure: 8
-  hard_stop_enabled: false
+  hard_stop_enabled: true
   warn_after:
     exact_failure: 2
     idempotent_no_progress: 2
