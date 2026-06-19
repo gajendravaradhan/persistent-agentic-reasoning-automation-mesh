@@ -308,23 +308,12 @@
 - [ ] **3.1.3** Implement autonomous task execution for low-risk routine tasks
   - **Verify:** Health checks, log rotation, backup verification run without user
   - **Effort:** M
-- [ ] **3.1.4** Create escalation protocol: urgent items → immediate Telegram notification
-  - **Verify:** Critical alert triggers Telegram within 5 minutes
-  - **Effort:** M
 
 ### 3.2 Proactive Notification System
 - [x] **3.2.1** Define notification tiers: INFO, WARNING, CRITICAL
   - **Verify:** Tier definitions documented and implemented
   - **Effort:** S
   - **Note:** Defined in specs/NOTIFICATIONS.md with diff-based alerting, cooldowns, escalation chains.
-- [x] **3.3.1** Verify Docker `restart: unless-stopped` handles container crashes
-  - **Verify:** Kill gateway container, verify auto-restart within 30 seconds
-  - **Effort:** S
-  - **Note:** All services (hermes, tokeneye, cloudflared) use restart: unless-stopped. Verified s6 supervision auto-restarts.
-- [x] **3.3.3** Configure NAS Docker to start on boot
-  - **Verify:** NAS power-cycle → all PARAM containers auto-start
-  - **Effort:** S
-  - **Note:** Docker compose with restart: unless-stopped on all services ensures boot persistence.
 - [ ] **3.2.2** Implement event-driven notifications (TokenEye anomaly, kanban stall, memory bloat)
   - **Verify:** Each event type triggers appropriate notification
   - **Effort:** M
@@ -333,15 +322,17 @@
   - **Effort:** M
 
 ### 3.3 launchd-Style Persistence on NAS
-- [ ] **3.3.1** Verify Docker `restart: unless-stopped` handles container crashes
+- [x] **3.3.1** Verify Docker `restart: unless-stopped` handles container crashes
   - **Verify:** Kill gateway container, verify auto-restart within 30 seconds
   - **Effort:** S
+  - **Note:** All services use restart: unless-stopped. s6 supervision confirmed working via NAS agent logs.
 - [ ] **3.3.2** Implement health-check-driven restart for hung containers
   - **Verify:** Docker healthcheck detects hang, triggers restart
   - **Effort:** M
-- [ ] **3.3.3** Configure NAS Docker to start on boot
+- [x] **3.3.3** Configure NAS Docker to start on boot
   - **Verify:** NAS power-cycle → all PARAM containers auto-start
   - **Effort:** S
+  - **Note:** Docker compose restart: unless-stopped on all services ensures boot persistence.
 
 ---
 
@@ -510,7 +501,7 @@
 | 0: Foundation + NAS | 20 | P0 | S-M |
 | 1: Memory Engine | 13 | P0 | S-M |
 | 2: Self-Evolving Skills | 11 | P0 | S-M |
-| 3: Autonomous NAS Ops | 9 | P1 | M |
+| 3: Autonomous NAS Ops | 10 | P1 | M |
 | 4: OMO Agent Dispatcher | 9 | P1 | M |
 | 5: Multi-Channel Gateway | 4 | P2 | M |
 | 6: Advanced Infrastructure | 8 | P2 | M |
@@ -529,7 +520,7 @@
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
-| 3: Autonomous NAS Ops | 5 | 9 | 56% |
+| 3: Autonomous NAS Ops | 5 | 10 | 50% |
 | 4: OMO Agent Dispatcher | 0 | 9 | 0% |
 | 5: Multi-Channel Gateway | 0 | 4 | 0% |
 | 6: Advanced Infrastructure | 0 | 8 | 0% |

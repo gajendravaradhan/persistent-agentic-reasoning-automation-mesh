@@ -263,6 +263,21 @@ cron:
     no_agent: true
     schedule: '*/5 * * * *'
     script: cloudflared-watchdog.sh
+  - enabled: true
+    name: wake-and-check
+    prompt: 'Check for: unread Telegram messages, pending kanban tasks, system health
+      anomalies, stale workers. Only report if something actionable found (no empty
+      status messages).'
+    schedule: '*/30 * * * *'
+    skills: []
+  - enabled: true
+    name: notification-controller
+    prompt: 'Check notification state against current system state: Gateway health,
+      TokenEye health, Kanban board, Memory usage, Provider health. Compare against
+      last reported state. Only report deltas. Classify by tier (INFO/WARNING/CRITICAL).
+      Apply cooldown rules. Deliver via Telegram if actionable.'
+    schedule: '*/5 * * * *'
+    skills: []
   max_parallel_jobs: null
   tick_interval_seconds: 60
   wrap_response: true
@@ -390,10 +405,10 @@ display:
     first_lines: 2
     last_lines: 2
 fallback_providers:
-  - provider: nous
-    default: nous-hermes-3
-    base_url: https://api.nousresearch.com/v1
-    api_key: ''
+- api_key: ''
+  base_url: https://api.nousresearch.com/v1
+  default: nous-hermes-3
+  provider: nous
 file_read_max_chars: 100000
 gateway:
   media_delivery_allow_dirs: []
@@ -456,8 +471,6 @@ memory:
   nudge_interval: 10
   provider: honcho
   reasoning_depth: 2
-  user_profile_enabled: true
-  provider: honcho
   user_char_limit: 1375
   user_profile_enabled: true
   write_approval: false
