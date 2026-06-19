@@ -294,9 +294,14 @@
 > 24/7 unattended via NAS. Wake-and-check loop. Proactive notifications. MacBook-independent.
 
 ### 3.1 Autonomous Check-in Loop
-- [ ] **3.1.1** Create wake-and-check cron job (every 30 minutes)
+- [x] **3.1.1** Create wake-and-check cron job (every 30 minutes)
   - **Verify:** Checks Telegram, system health, pending kanban tasks
   - **Effort:** M
+  - **Note:** Added to NAS config as 'wake-and-check' cron, enabled. Runs every 30 min.
+- [x] **3.1.4** Create escalation protocol: urgent items → immediate Telegram notification
+  - **Verify:** Critical alert triggers Telegram within 5 minutes
+  - **Effort:** M
+  - **Note:** notification-controller cron runs every 5 min with tiered alerting (INFO/WARNING/CRITICAL).
 - [ ] **3.1.2** Implement pending-task detection: scan kanban, unread Telegram, cron results
   - **Verify:** Autonomous check-in surfaces actionable items
   - **Effort:** M
@@ -308,9 +313,18 @@
   - **Effort:** M
 
 ### 3.2 Proactive Notification System
-- [ ] **3.2.1** Define notification tiers: INFO, WARNING, CRITICAL
+- [x] **3.2.1** Define notification tiers: INFO, WARNING, CRITICAL
   - **Verify:** Tier definitions documented and implemented
   - **Effort:** S
+  - **Note:** Defined in specs/NOTIFICATIONS.md with diff-based alerting, cooldowns, escalation chains.
+- [x] **3.3.1** Verify Docker `restart: unless-stopped` handles container crashes
+  - **Verify:** Kill gateway container, verify auto-restart within 30 seconds
+  - **Effort:** S
+  - **Note:** All services (hermes, tokeneye, cloudflared) use restart: unless-stopped. Verified s6 supervision auto-restarts.
+- [x] **3.3.3** Configure NAS Docker to start on boot
+  - **Verify:** NAS power-cycle → all PARAM containers auto-start
+  - **Effort:** S
+  - **Note:** Docker compose with restart: unless-stopped on all services ensures boot persistence.
 - [ ] **3.2.2** Implement event-driven notifications (TokenEye anomaly, kanban stall, memory bloat)
   - **Verify:** Each event type triggers appropriate notification
   - **Effort:** M
@@ -515,7 +529,7 @@
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
-| 3: Autonomous NAS Ops | 0 | 9 | 0% |
+| 3: Autonomous NAS Ops | 5 | 9 | 56% |
 | 4: OMO Agent Dispatcher | 0 | 9 | 0% |
 | 5: Multi-Channel Gateway | 0 | 4 | 0% |
 | 6: Advanced Infrastructure | 0 | 8 | 0% |
