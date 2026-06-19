@@ -2,6 +2,10 @@
 # Actual config lives in ~/.hermes/config.yaml under cron.jobs
 # This file documents the schema. Copy jobs from here into config.yaml.
 
+# ============================================================
+# Phase 0: Existing Jobs
+# ============================================================
+
 # Morning briefing: daily status digest at 8am
 - name: morning-briefing
   schedule: "0 8 * * *"
@@ -16,9 +20,65 @@
   skills: []
   enabled: true
 
-# Memory consolidation: clean up memories weekly
+# ============================================================
+# Phase 1: Memory Automation
+# ============================================================
+
+# Memory consolidation: clean up memories weekly (Honcho-managed)
 - name: memory-consolidation
   schedule: "0 2 * * 0"
-  prompt: "Review MEMORY.md and USER.md. Remove stale entries, deduplicate."
+  prompt: "Review and consolidate PARAM memories. Remove stale entries (>30 days no recall), deduplicate semantically similar memories, organize by category. Keep under 2200 char limit for MEMORY.md. Report what was pruned."
   skills: []
   enabled: true
+
+# Vault → Hindsight sync: incremental ingestion every 30 minutes
+- name: vault-hindsight-sync
+  schedule: "*/30 * * * *"
+  prompt: "Incrementally sync the Obsidian vault at /workspace/vault/ to Hindsight. Use mtime-based detection. Only ingest files changed since last sync. 90-second wall budget. Report files synced or skip if no changes."
+  skills: []
+  enabled: false  # Enable after Hindsight deployed (Phase 1.2)
+  comment: "Requires Hindsight container on NAS with pgvector."
+
+# Planner daily note: writes ops summary to vault nightly
+- name: planner-daily-note
+  schedule: "0 22 * * *"
+  prompt: "Write a daily operations note to the Obsidian vault at Operations/YYYY-MM-DD.md. Include: tasks completed today, sessions run, errors encountered, decisions made, memory growth, token usage from TokenEye. Keep concise and factual."
+  skills: []
+  enabled: false  # Enable after vault structure verified
+  comment: "Writes to vault/Operations/. Vault syncs to Hindsight automatically."
+
+# ============================================================
+# Phase 3: Autonomous Operations (future)
+# ============================================================
+
+# Wake-and-check: periodic autonomous check-in
+- name: wake-and-check
+  schedule: "*/30 * * * *"
+  prompt: "Check for: unread Telegram messages, pending kanban tasks, system health anomalies, stale workers. Only report if something actionable found (no empty status messages)."
+  skills: []
+  enabled: false  # Enable in Phase 3
+
+# ============================================================
+# Phase 4: OMO Agent Dispatcher (future)
+# ============================================================
+
+# Kanban flowkeeper: LLM agent cleans board
+- name: kanban-flowkeeper
+  schedule: "*/30 * * * *"
+  prompt: "Review the kanban board. Clear orphaned tasks (no parent, no worker). Propagate unblock chains. Flag tasks stalled >4 hours. Report changes made."
+  skills: []
+  enabled: false  # Enable in Phase 4
+
+# Post-work audit: audit completed tasks
+- name: kanban-post-work-audit
+  schedule: "*/30 * * * *"
+  prompt: "Audit tasks completed in the last 2 hours. Check against acceptance criteria. Flag any that fail verification. Report pass/fail summary."
+  skills: []
+  enabled: false  # Enable in Phase 4
+
+# Inference live probe: test each provider
+- name: inference-live-probe
+  schedule: "0 */4 * * *"
+  prompt: "Run a real completion on every configured provider (opencode-go, nous). Verify response validity. Report any failures via Telegram alert."
+  skills: []
+  enabled: false  # Enable in Phase 4
