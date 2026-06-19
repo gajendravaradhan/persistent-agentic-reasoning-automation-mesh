@@ -22,6 +22,21 @@ Deploy PARAM/Hermes on Ugreen NAS with Docker Compose for 24/7 unattended operat
 
 ## Quick Start
 
+**Option 1: Use pre-prepared config (recommended — already done in repo)**
+
+```bash
+cd persistent-agentic-reasoning-automation-mesh/deploy/nas
+
+# hermes-data/ is already populated from Mac. Edit .env if needed.
+nano hermes-data/.env
+# Verify: TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS
+
+# Start
+HERMES_UID=$(id -u) HERMES_GID=$(id -g) ./deploy.sh start
+```
+
+**Option 2: Prepare fresh from local Hermes**
+
 ```bash
 cd persistent-agentic-reasoning-automation-mesh/deploy/nas
 
@@ -30,8 +45,6 @@ cd persistent-agentic-reasoning-automation-mesh/deploy/nas
 
 # 2. Edit API keys
 nano hermes-data/.env
-# Required: TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS
-# Model routing: see provider section below
 
 # 3. Start
 HERMES_UID=$(id -u) HERMES_GID=$(id -g) ./deploy.sh start
@@ -109,15 +122,21 @@ Get keys:
 ## Cloudflare Tunnel (Dashboard Remote Access)
 
 ```bash
+# Non-interactive setup (uses pre-configured *.aiforges.app domain)
+./cloudflared-setup-noninteractive.sh
+
+# Or interactive setup (any domain)
 ./cloudflared-setup.sh
 ```
 
-Creates a secure tunnel from NAS to Cloudflare. Dashboard available at your domain without opening router ports.
+Creates a secure tunnel from NAS to Cloudflare. Dashboard available at `https://param.aiforges.app` without opening router ports.
 
-For quick testing (temporary URL):
-```bash
-cloudflared tunnel --url http://localhost:9119
-```
+**Tunnel routes:**
+| Hostname | Service | Port |
+|----------|---------|------|
+| `param.aiforges.app` | Hermes Dashboard | 9119 |
+| `api.param.aiforges.app` | API / Health | 9119 |
+| `tokeneye.aiforges.app` | TokenEye Dashboard | 8788 |
 
 ## Commands
 
