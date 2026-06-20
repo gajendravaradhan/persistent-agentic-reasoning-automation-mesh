@@ -8,6 +8,11 @@ RED='\033[0;31m'
 NC='\033[0m'
 BOLD='\033[1m'
 
+# Strip colors when not a terminal (cron → Telegram delivery)
+if [ ! -t 1 ]; then
+    GREEN='' YELLOW='' RED='' NC='' BOLD=''
+fi
+
 echo -e "${BOLD}PARAM Status Dashboard${NC}"
 echo "======================"
 
