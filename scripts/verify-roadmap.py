@@ -572,6 +572,170 @@ def verify_patch_system():
     ok = patch_dir.exists() or nas_dir_exists("/home/Nasama-Pochu/param/deploy/nas/patches")
     return ok, "Patches directory exists" if ok else "No patches directory found"
 
+
+# ============================================================
+# INTENT ROUTER VERIFICATION CHECKS (INTENT_ROUTER_ROADMAP.md)
+# ============================================================
+
+@check("IR-0.1.1")
+def verify_router_dir():
+    d = PROJECT_ROOT / "src" / "router"
+    init = d / "__init__.py"
+    ok = d.exists() and init.exists()
+    return ok, "src/router/ exists with __init__.py" if ok else "src/router/ MISSING"
+
+@check("IR-0.1.2")
+def verify_router_types():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.types import Intent, ClassifiedIntent, RouteDecision, AuditEntry
+        ok = len(Intent) >= 11 and all(hasattr(ClassifiedIntent, a) for a in ["intent","confidence","method"])
+        return ok, f"All types importable ({len(Intent)} intents)" if ok else "Types MISSING fields"
+    except ImportError as e:
+        return False, f"Types import FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.1.3")
+def verify_router_test_dir():
+    d = PROJECT_ROOT / "tests" / "test_router"
+    init = d / "__init__.py"
+    ok = d.exists() and init.exists()
+    return ok, "tests/test_router/ exists" if ok else "Test dir MISSING"
+
+@check("IR-0.2.1")
+def verify_rule_engine_patterns():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.classifier import RULES
+        intents_covered = set(r[1] for r in RULES)
+        ok = len(intents_covered) >= 8
+        return ok, f"{len(intents_covered)} intents covered by rules" if ok else f"Only {len(intents_covered)} intents have rules"
+    except ImportError:
+        return False, "classifier.py not importable"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.2.4")
+def verify_classify_entry():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.classifier import classify
+        result = classify("find where auth is defined")
+        ok = hasattr(result, "intent") and hasattr(result, "confidence")
+        return ok, f"classify() works: intent={result.intent}" if ok else "classify() returns wrong type"
+    except Exception as e:
+        return False, f"classify() FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.3.1")
+def verify_confidence_guard():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.types import ClassifiedIntent, Intent
+        from router.guard import ConfidenceGuard
+        g = ConfidenceGuard()
+        high = ClassifiedIntent(Intent.CASUAL_CHAT, 0.95, "test")
+        low = ClassifiedIntent(Intent.CODE_SEARCH, 0.60, "test")
+        r1 = g.check(high)
+        r2 = g.check(low)
+        ok = r1.route == "PROCEED" and r2.route == "FALLBACK_LLM"
+        return ok, "ConfidenceGuard: high→PROCEED, low→FALLBACK" if ok else "Guard routing incorrect"
+    except Exception as e:
+        return False, f"ConfidenceGuard FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.3.2")
+def verify_safety_gate():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.types import ClassifiedIntent, Intent
+        from router.guard import SafetyGate
+        g = SafetyGate()
+        deploy = ClassifiedIntent(Intent.DEPLOYMENT, 0.95, "test")
+        casual = ClassifiedIntent(Intent.CASUAL_CHAT, 0.95, "test")
+        r1 = g.check(deploy)
+        r2 = g.check(casual)
+        ok = r1.route == "BLOCK" and r2.route == "PROCEED"
+        return ok, "SafetyGate: DEPLOY→BLOCK, CHAT→PROCEED" if ok else "Safety gate incorrect"
+    except Exception as e:
+        return False, f"SafetyGate FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.4.1")
+def verify_route_mapping():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.types import Intent
+        from router.routes import INTENT_ROUTES
+        missing = [i for i in Intent if i not in INTENT_ROUTES]
+        ok = len(missing) == 0
+        return ok, f"All {len(Intent)} intents mapped" if ok else f"Missing routes: {missing}"
+    except ImportError:
+        return False, "routes.py not importable"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.5.1")
+def verify_audit_logger():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.audit import AuditLogger
+        from router.types import AuditEntry, Intent
+        from datetime import datetime
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl") as f:
+            tmp = f.name
+        logger = AuditLogger(tmp)
+        entry = AuditEntry(datetime.now(), "test123", "test request", Intent.CASUAL_CHAT.name, 0.95, "rule", "llm", [], "routed", 5)
+        logger.log(entry)
+        ok = os.path.exists(tmp) and os.path.getsize(tmp) > 0
+        os.unlink(tmp)
+        return ok, "AuditLogger writes entries" if ok else "AuditLogger write FAILED"
+    except Exception as e:
+        return False, f"AuditLogger FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-0.6.1")
+def verify_classify_and_route():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router import classify_and_route
+        result = classify_and_route("find the auth middleware")
+        has_fields = all(k in result for k in ["intent","confidence","route","method","reason","requires_approval"])
+        ok = has_fields and result["confidence"] > 0
+        return ok, f"Pipeline works: {result['intent']}→{result['route']}" if ok else "Pipeline returns incomplete result"
+    except Exception as e:
+        return False, f"Pipeline FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+@check("IR-1.1.9")
+def verify_router_coverage():
+    try:
+        result = subprocess.run(
+            ["python3","-m","pytest","tests/test_router/","-q","--no-header","--tb=no",
+             "--cov=src/router","--cov-fail-under=90","--cov-report=term"],
+            capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30
+        )
+        passed = "FAILED" not in result.stdout and result.returncode == 0
+        return passed, "Router coverage >= 90%" if passed else f"Coverage FAILED: {result.stdout[-100:]}"
+    except Exception as e:
+        return False, f"Coverage check FAILED: {e}"
+
+
 def run_verification(phases: dict, phase_filter: Optional[int] = None):
     """Run verification for all tasks marked [x] across all phases."""
     total_claimed = 0
