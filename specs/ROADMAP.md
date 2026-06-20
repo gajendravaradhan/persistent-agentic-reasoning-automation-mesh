@@ -483,9 +483,10 @@
    - **Verify:** Zero secrets in git-tracked files
    - **Effort:** M
    - **Note:** Scanned for sk-, pk-, telegram bot tokens, base64 secrets, API keys. All actual secrets in gitignored .env files. Tracked configs use empty placeholders. Repo clean.
-- [ ] **9.1.2** Implement `.env` validation on startup (required keys present, non-empty)
-  - **Verify:** Startup fails with clear error if required keys missing
-  - **Effort:** S
+- [x] **9.1.2** Implement `.env` validation on startup (required keys present, non-empty)
+   - **Verify:** Startup fails with clear error if required keys missing
+   - **Effort:** S
+   - **Note:** `deploy/nas/validate-env.sh` — validates TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS (critical), Langfuse key format (pk-lf-/sk-lf-), TokenEye key. Exit code 1 on failures.
 - [ ] **9.1.3** Add annual secret rotation reminder cron job
   - **Verify:** Cron job reminds to rotate API keys
   - **Effort:** S
@@ -532,8 +533,8 @@
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
 | 7: Observability | 2 | 4 | 50% |
 | 8: Testing & CI/CD | 5 | 5 | 100% |
-| 9: Security Hardening | 4 | 5 | 80% |
-| **TOTAL** | **61** | **82** | **74%** |
+| 9: Security Hardening | 5 | 5 | 100% |
+| **TOTAL** | **62** | **82** | **76%** |
 
 ---
 
