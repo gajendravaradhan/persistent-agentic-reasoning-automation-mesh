@@ -753,6 +753,39 @@ def verify_router_on_nas():
     ok = "function" in out
     return ok, "Router importable and functional on NAS" if ok else "Router NOT available on NAS"
 
+
+@check("7.1.2")
+def verify_cost_alerts():
+    out = ssh("grep -c 'Cost alert' /home/Nasama-Pochu/param/deploy/nas/hermes-data/config.yaml")
+    ok = out.strip() == "1"
+    return ok, "Cost alert in notification-controller" if ok else "Cost alert NOT in config"
+
+@check("9.1.3")
+def verify_secret_rotation():
+    out = ssh("grep -c 'secret-rotation-reminder' /home/Nasama-Pochu/param/deploy/nas/hermes-data/config.yaml")
+    ok = out.strip() == "1"
+    return ok, "Secret rotation cron exists" if ok else "Secret rotation cron MISSING"
+
+@check("3.3.2")
+def verify_autoheal():
+    out = ssh("grep -c 'autoheal.sh' /home/Nasama-Pochu/param/deploy/nas/hermes-data/config.yaml")
+    ok = out.strip() == "1"
+    return ok, "autoheal cron exists" if ok else "autoheal cron MISSING"
+
+@check("9.2.1")
+def verify_telegram_whitelist():
+    out = ssh("grep TELEGRAM_ALLOWED_USERS /home/Nasama-Pochu/param/deploy/nas/hermes-data/.env | grep -c '='")
+    try:
+        count = int(out.strip())
+        return count >= 1, "TELEGRAM_ALLOWED_USERS configured" if count >= 1 else "TELEGRAM_ALLOWED_USERS MISSING"
+    except:
+        return False, "Cannot verify Telegram whitelist"
+
+@check("6.2.2")
+def verify_bitwarden_documented():
+    vault = nas_container_healthy("param-vaultwarden")
+    return vault, "Vaultwarden running (encrypted storage)" if vault else "Vaultwarden NOT running"
+
 def run_verification(phases: dict, phase_filter: Optional[int] = None):
     """Run verification for all tasks marked [x] across all phases."""
     total_claimed = 0
