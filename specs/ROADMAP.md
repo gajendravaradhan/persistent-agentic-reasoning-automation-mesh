@@ -305,9 +305,10 @@
   - **Verify:** Critical alert triggers Telegram within 5 minutes
   - **Effort:** M
   - **Note:** notification-controller cron runs every 5 min with tiered alerting (INFO/WARNING/CRITICAL).
-- [ ] **3.1.2** Implement pending-task detection: scan kanban, unread Telegram, cron results
-  - **Verify:** Autonomous check-in surfaces actionable items
-  - **Effort:** M
+- [x] **3.1.2** Implement pending-task detection: scan kanban, unread Telegram, cron results
+   - **Verify:** Autonomous check-in surfaces actionable items
+   - **Effort:** M
+   - **Note:** Enhanced wake-and-check cron (every 30min) with diff-based tracking via notify-state.json. Reports only NEW pending items, escalates items persisting 3+ cycles (90min). Uses shared state file with notification-controller. Cron prompt updated on NAS.
 - [ ] **3.1.3** Implement autonomous task execution for low-risk routine tasks
   - **Verify:** Health checks, log rotation, backup verification run without user
   - **Effort:** M
@@ -529,7 +530,7 @@
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
-| 3: Autonomous NAS Ops | 7 | 10 | 70% |
+| 3: Autonomous NAS Ops | 8 | 10 | 80% |
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
