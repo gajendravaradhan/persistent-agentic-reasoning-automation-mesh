@@ -27,6 +27,12 @@ services:
       - HERMES_DASHBOARD=1
       - HERMES_DASHBOARD_HOST=0.0.0.0
       - HERMES_DASHBOARD_INSECURE=1
+      # -- Langfuse Observability (uncomment when keys obtained from cloud.langfuse.com) --
+      # - HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-...
+      # - HERMES_LANGFUSE_SECRET_KEY=sk-lf-...
+      # - HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com
+      # - HERMES_LANGFUSE_ENV=production
+      # - HERMES_LANGFUSE_SAMPLE_RATE=1.0
     command: ["gateway", "run"]
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9119/", "-o", "/dev/null"]
