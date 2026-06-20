@@ -28,3 +28,4 @@ deploy/nas/hermes-data/.env
 deploy/nas/hermes-data/sessions/
 .certs/
 *.pem
+specs/verification-report.json
