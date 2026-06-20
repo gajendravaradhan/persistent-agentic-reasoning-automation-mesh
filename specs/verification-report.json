@@ -1,0 +1,345 @@
+{
+  "timestamp": "2026-06-20T02:56:50.502457",
+  "verified": 46,
+  "failed": 4,
+  "manual": 6,
+  "total_claimed": 56,
+  "results": [
+    {
+      "id": "0.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Memory provider=honcho, enabled=True"
+    },
+    {
+      "id": "0.1.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "hermes CLI in PATH"
+    },
+    {
+      "id": "0.1.3",
+      "claimed": "completed",
+      "verified": null,
+      "reason": "MANUAL: requires live Telegram message exchange"
+    },
+    {
+      "id": "0.2.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "hermes-data directory exists on NAS"
+    },
+    {
+      "id": "0.2.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": ".env has TELEGRAM_BOT_TOKEN"
+    },
+    {
+      "id": "0.2.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "model.base_url = http://tokeneye:8787/zen/go/v1"
+    },
+    {
+      "id": "0.2.4",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "TokenEye container healthy"
+    },
+    {
+      "id": "0.2.5",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Hermes gateway healthy"
+    },
+    {
+      "id": "0.2.6",
+      "claimed": "completed",
+      "verified": null,
+      "reason": "MANUAL: requires sending /status via Telegram"
+    },
+    {
+      "id": "0.3.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "cloudflared container running"
+    },
+    {
+      "id": "0.3.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "param.aiforges.app in tunnel config"
+    },
+    {
+      "id": "0.3.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "3/3 routes configured: ['param.aiforges.app', 'hook.param.aiforges.app', 'vault.param.aiforges.app']"
+    },
+    {
+      "id": "0.3.4",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "restart policy: unless-stopped"
+    },
+    {
+      "id": "0.3.5",
+      "claimed": "completed",
+      "verified": null,
+      "reason": "MANUAL: requires timestamped roundtrip test"
+    },
+    {
+      "id": "0.4.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "TokenEye has 2 opencode-go keys"
+    },
+    {
+      "id": "0.4.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Nous provider in fallback chain"
+    },
+    {
+      "id": "0.4.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "1 fallback providers configured"
+    },
+    {
+      "id": "0.5.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "README.md exists and populated"
+    },
+    {
+      "id": "0.5.2",
+      "claimed": "completed",
+      "verified": false,
+      "reason": "Caveman references in: ['/Users/gajendra/projects/persistent-agentic-reasoning-automation-mesh/specs/ROADMAP.md', '/Users/gajendra/projects/persistent-agentic-reasoning-automation-mesh/scripts/verify-roadmap.py']"
+    },
+    {
+      "id": "0.5.3",
+      "claimed": "completed",
+      "verified": false,
+      "reason": "git has uncommitted changes"
+    },
+    {
+      "id": "1.1.1",
+      "claimed": "completed",
+      "verified": false,
+      "reason": "Honcho NOT installed in container"
+    },
+    {
+      "id": "1.1.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Honcho health: 200"
+    },
+    {
+      "id": "1.1.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "memory.provider = honcho"
+    },
+    {
+      "id": "1.1.4",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "reasoning_depth = 2"
+    },
+    {
+      "id": "1.1.5",
+      "claimed": "completed",
+      "verified": null,
+      "reason": "MANUAL: requires multi-session memory retrieval test"
+    },
+    {
+      "id": "1.3.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "vault has 7 dirs"
+    },
+    {
+      "id": "1.3.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "vault-hindsight-sync cron exists"
+    },
+    {
+      "id": "1.3.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "planner-daily-note cron exists"
+    },
+    {
+      "id": "1.4.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "memory-consolidation cron exists"
+    },
+    {
+      "id": "1.4.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Memory health check in param-status.sh"
+    },
+    {
+      "id": "2.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "skill-whitelist.yaml exists"
+    },
+    {
+      "id": "2.1.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "4+ agent configs in whitelist"
+    },
+    {
+      "id": "2.1.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Skills whitelist exists \u2014 token savings documented in ROADMAP"
+    },
+    {
+      "id": "3.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "wake-and-check cron exists"
+    },
+    {
+      "id": "3.1.4",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "notification-controller cron exists"
+    },
+    {
+      "id": "3.1.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "state file exists for diff-based tracking"
+    },
+    {
+      "id": "3.2.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "NOTIFICATIONS.md exists"
+    },
+    {
+      "id": "3.2.2",
+      "claimed": "completed",
+      "verified": null,
+      "reason": "MANUAL: requires observing live notification delivery"
+    },
+    {
+      "id": "3.2.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "state file exists"
+    },
+    {
+      "id": "3.3.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Hermes restart: unless-stopped"
+    },
+    {
+      "id": "3.3.3",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Docker compose auto-start via unless-stopped"
+    },
+    {
+      "id": "4.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "kanban dispatcher confirmed in logs"
+    },
+    {
+      "id": "4.3.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Provider health has 3 references in status script"
+    },
+    {
+      "id": "5.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Discord enabled in gateway"
+    },
+    {
+      "id": "5.2.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Webhook enabled in gateway"
+    },
+    {
+      "id": "5.2.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Webhook platform enabled (GitHub route via tunnel)"
+    },
+    {
+      "id": "5.1.2",
+      "claimed": "completed",
+      "verified": null,
+      "reason": "MANUAL: requires testing memory retrieval across platforms"
+    },
+    {
+      "id": "6.3.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "PATCHES.md exists"
+    },
+    {
+      "id": "6.3.2",
+      "claimed": "completed",
+      "verified": false,
+      "reason": "No patches directory found"
+    },
+    {
+      "id": "6.1.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Websurfx HTTP 200"
+    },
+    {
+      "id": "7.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "param-status.sh has TokenEye metrics code"
+    },
+    {
+      "id": "7.2.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Evaluation documented in ROADMAP.md"
+    },
+    {
+      "id": "7.2.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "env vars set, plugin enabled"
+    },
+    {
+      "id": "8.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "pytest: ============================= test session starts =============================="
+    },
+    {
+      "id": "9.1.1",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "Secrets audit documented and clean"
+    },
+    {
+      "id": "9.1.2",
+      "claimed": "completed",
+      "verified": true,
+      "reason": "validate-env.sh exists on NAS"
+    }
+  ]
+}
