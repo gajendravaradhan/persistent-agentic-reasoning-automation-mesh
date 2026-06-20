@@ -317,9 +317,10 @@
   - **Verify:** Tier definitions documented and implemented
   - **Effort:** S
   - **Note:** Defined in specs/NOTIFICATIONS.md with diff-based alerting, cooldowns, escalation chains.
-- [ ] **3.2.2** Implement event-driven notifications (TokenEye anomaly, kanban stall, memory bloat)
-  - **Verify:** Each event type triggers appropriate notification
-  - **Effort:** M
+- [x] **3.2.2** Implement event-driven notifications (TokenEye anomaly, kanban stall, memory bloat)
+   - **Verify:** Each event type triggers appropriate notification
+   - **Effort:** M
+   - **Note:** Notification-controller cron (every 5 min) detects all specified events: TokenEye health probe, kanban backlog scan, MEMORY.md size check, provider health, cron failures. Paired with diff-based suppression (3.2.3) to prevent duplicates. State file at /opt/data/state/notify-state.json.
 - [x] **3.2.3** Implement diff-based Telegram alerts (only notify on state change — Reddit pattern)
    - **Verify:** Consecutive identical status reports don't trigger duplicate messages
    - **Effort:** M
@@ -528,14 +529,14 @@
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
-| 3: Autonomous NAS Ops | 6 | 10 | 60% |
+| 3: Autonomous NAS Ops | 7 | 10 | 70% |
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
 | 7: Observability | 2 | 4 | 50% |
 | 8: Testing & CI/CD | 5 | 5 | 100% |
 | 9: Security Hardening | 5 | 5 | 100% |
-| **TOTAL** | **63** | **82** | **77%** |
+| **TOTAL** | **64** | **82** | **78%** |
 
 ---
 
