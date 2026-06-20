@@ -746,6 +746,13 @@ def verify_router_coverage():
         return False, f"Coverage check FAILED: {e}"
 
 
+
+@check("NAS-ROUTER")
+def verify_router_on_nas():
+    out = ssh("docker exec param python3 -c \"import sys; sys.path.insert(0,\\\"/opt/data/router\\\"); from router import classify_and_route; print(type(classify_and_route))\"")
+    ok = "function" in out
+    return ok, "Router importable and functional on NAS" if ok else "Router NOT available on NAS"
+
 def run_verification(phases: dict, phase_filter: Optional[int] = None):
     """Run verification for all tasks marked [x] across all phases."""
     total_claimed = 0

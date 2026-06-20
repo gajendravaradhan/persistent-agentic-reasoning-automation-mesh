@@ -36,6 +36,8 @@ services:
       # -- Vaultwarden Secrets --
       - BW_CLIENTID=user.43a88ce4-c38e-476e-9bef-f40d8760ae39
       - BW_CLIENTSECRET=UIufNyU4faPdnz7vYpW4gwZ1rXh2h0
+      # PARAM router available at /opt/data/router/
+      # Import: sys.path.insert(0, "/opt/data/router"); from router import classify_and_route
     command: ["gateway", "run"]
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9119/", "-o", "/dev/null"]
