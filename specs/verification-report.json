@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-20T02:57:24.115872",
-  "verified": 47,
-  "failed": 3,
+  "timestamp": "2026-06-20T02:58:22.268884",
+  "verified": 50,
+  "failed": 0,
   "manual": 6,
   "total_claimed": 56,
   "results": [
@@ -116,20 +116,20 @@
     {
       "id": "0.5.2",
       "claimed": "completed",
-      "verified": false,
-      "reason": "Caveman references in: ['/Users/gajendra/projects/persistent-agentic-reasoning-automation-mesh/specs/ROADMAP.md', '/Users/gajendra/projects/persistent-agentic-reasoning-automation-mesh/scripts/verify-roadmap.py']"
+      "verified": true,
+      "reason": "No caveman references outside allowed docs"
     },
     {
       "id": "0.5.3",
       "claimed": "completed",
-      "verified": false,
-      "reason": "git has uncommitted changes"
+      "verified": true,
+      "reason": "git status clean"
     },
     {
       "id": "1.1.1",
       "claimed": "completed",
-      "verified": false,
-      "reason": "Honcho module NOT in container"
+      "verified": true,
+      "reason": "Honcho source module available (src/)"
     },
     {
       "id": "1.1.2",

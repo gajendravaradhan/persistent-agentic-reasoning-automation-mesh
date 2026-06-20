@@ -669,14 +669,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PARAM ROADMAP Verification System")
     parser.add_argument("--phase", type=int, help="Verify specific phase only")
     parser.add_argument("--nas", default="192.168.1.167", help="NAS IP address")
+    parser.add_argument("--roadmap", default=str(ROADMAP_PATH), help="Path to ROADMAP.md file")
     parser.add_argument("--json", action="store_true", help="Output JSON only")
     args = parser.parse_args()
 
-    phases = parse_roadmap(ROADMAP_PATH)
+    roadmap_path = Path(args.roadmap)
+    if not roadmap_path.exists():
+        print(f"ERROR: ROADMAP not found at {roadmap_path}")
+        sys.exit(1)
+
+    phases = parse_roadmap(roadmap_path)
 
     if not args.json:
         print(f"{BOLD}PARAM ROADMAP Verification System{NC}")
-        print(f"ROADMAP: {ROADMAP_PATH}")
+        print(f"ROADMAP: {roadmap_path}")
         print(f"NAS: {args.nas}")
         print(f"Time: {datetime.now().isoformat()}")
         print(f"Checks defined: {len(CHECKS)}")
