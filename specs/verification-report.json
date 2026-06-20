@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-20T02:56:50.502457",
-  "verified": 46,
-  "failed": 4,
+  "timestamp": "2026-06-20T02:57:24.115872",
+  "verified": 47,
+  "failed": 3,
   "manual": 6,
   "total_claimed": 56,
   "results": [
@@ -129,7 +129,7 @@
       "id": "1.1.1",
       "claimed": "completed",
       "verified": false,
-      "reason": "Honcho NOT installed in container"
+      "reason": "Honcho module NOT in container"
     },
     {
       "id": "1.1.2",
@@ -296,8 +296,8 @@
     {
       "id": "6.3.2",
       "claimed": "completed",
-      "verified": false,
-      "reason": "No patches directory found"
+      "verified": true,
+      "reason": "Patches directory exists"
     },
     {
       "id": "6.1.2",
