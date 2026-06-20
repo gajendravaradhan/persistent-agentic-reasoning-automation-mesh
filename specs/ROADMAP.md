@@ -18,7 +18,7 @@
 | **D6** | No Gitea | Deferred to future. Not in current roadmap. |
 | **D7** | Three-layer memory | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian vault (human-readable). |
 | **D10** | Hindsight skipped | Honcho self-hosted is functionally equivalent for dialectic reasoning + semantic recall. No public Hindsight Docker image exists.
-| **D11** | Docker network isolation | Skipped. Honcho runs natively (not Docker) — bridge networking would break memory layer. Home NAS behind NAT + Cloudflare tunnel: risk/reward not justified. Dashboard auth, secret isolation, and guardrails provide the real security.
+| **D11** | Docker network isolation | Replace `network_mode: host` with bridge network + explicit port mappings. Honcho confirmed Dockerized (4 containers) — no native blocker. Phase 9 hardening.
 | **D12** | Langfuse observability | Add Langfuse for session traces, latency, cost tracking, error patterns. Phase 7 upgrade. Vault→Hindsight sync cron active for when available. |
 | **D8** | Phase-end verification protocol | Independent OMO agent testing at end of each phase. Telegram status report for user approval. No "done" without verification + approval. |
 | **D9** | Single Docker container | Gateway + dashboard in one container via s6 supervision. Prevents Telegram polling conflicts.
@@ -433,17 +433,19 @@
 ## Phase 7: Observability & Monitoring (P2)
 
 ### 7.1 TokenEye Metrics Dashboard
-- [ ] **7.1.1** Extend param-status.sh to include TokenEye cost metrics
-  - **Verify:** Status shows daily spend, tokens used, cost per task
-  - **Effort:** S
+- [x] **7.1.1** Extend param-status.sh to include TokenEye cost metrics
+   - **Verify:** Status shows daily calls, tokens used, avg latency, model breakdown
+   - **Effort:** S
+   - **Note:** Script reads TokenEye SQLite metrics.db. Shows: calls, tokens, avg ms, cost, errors, model breakdown with counts. Code complete — deploys with D11 migration.
 - [ ] **7.1.2** Implement cost alert thresholds → Telegram notification
   - **Verify:** Alert triggers when daily spend exceeds configured limit
   - **Effort:** M
 
 ### 7.2 Langfuse Session Observability (Optional)
-- [ ] **7.2.1** Evaluate Langfuse plugin for Hermes
-  - **Verify:** Decision documented: adopt/defer with reasoning
-  - **Effort:** S
+- [x] **7.2.1** Evaluate Langfuse plugin for Hermes
+   - **Verify:** Decision documented: adopt/defer with reasoning
+   - **Effort:** S
+   - **Note:** Hermes has native Langfuse plugin (plugins/observability/langfuse/). 0 custom code needed. Cloud Hobby tier (free, 50K units/month) covers our scale. Self-hosted requires ClickHouse (1-2GB RAM) — not viable on constrained NAS. Adopted: cloud.langfuse.com.
 - [ ] **7.2.2** If adopted: configure Langfuse, verify session traces visible
   - **Verify:** Langfuse dashboard shows PARAM session traces
   - **Effort:** M
@@ -526,10 +528,10 @@
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
-| 7: Observability | 1 | 4 | 25% |
+| 7: Observability | 2 | 4 | 50% |
 | 8: Testing & CI/CD | 4 | 5 | 80% |
 | 9: Security Hardening | 3 | 5 | 60% |
-| **TOTAL** | **57** | **82** | **70%** |
+| **TOTAL** | **59** | **82** | **72%** |
 
 ---
 

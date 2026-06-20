@@ -1,6 +1,11 @@
 #
 # PARAM Docker Deployment — UGREEN NAS
-# All services use restart: unless-stopped for boot survival.
+# All services on shared bridge network for isolation.
+# Honcho containers join via external network.
+
+networks:
+  param-net:
+    driver: bridge
 
 services:
   # Hermes — gateway + dashboard via s6 supervision
@@ -8,7 +13,9 @@ services:
     image: nousresearch/hermes-agent:latest
     container_name: param
     restart: unless-stopped
-    network_mode: host
+    networks: [param-net]
+    ports:
+      - "127.0.0.1:9119:9119"
     volumes:
       - ./hermes-data:/opt/data
       - ./hermes-data/scripts:/opt/data/scripts
@@ -35,7 +42,9 @@ services:
     image: oven/bun:latest
     container_name: param-tokeneye
     restart: unless-stopped
-    network_mode: host
+    networks: [param-net]
+    ports:
+      - "127.0.0.1:8787:8787"
     working_dir: /app
     volumes:
       - /home/Nasama-Pochu/param/tokeneye/src:/app/src:ro
@@ -51,17 +60,20 @@ services:
       retries: 5
       start_period: 180s
 
-  # Nginx — PWA + basic auth reverse proxy for dashboard
+  # Nginx — PWA + basic auth reverse proxy for dashboard + Vaultwarden
   nginx:
     image: nginx:alpine
     container_name: param-nginx
     restart: unless-stopped
-    network_mode: host
+    networks: [param-net]
+    ports:
+      - "127.0.0.1:9090:9090"
     volumes:
       - /home/Nasama-Pochu/param/deploy/nas/pwa:/pwa:ro
       - /home/Nasama-Pochu/param/deploy/nas/pwa/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - hermes
+      - vaultwarden
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:9090/"]
       interval: 30s
@@ -74,7 +86,9 @@ services:
     image: vaultwarden/server:latest
     container_name: param-vaultwarden
     restart: unless-stopped
-    network_mode: host
+    networks: [param-net]
+    ports:
+      - "127.0.0.1:8311:8311"
     volumes:
       - /home/Nasama-Pochu/param/vaultwarden-data:/data
     environment:
@@ -89,12 +103,22 @@ services:
       retries: 3
       start_period: 30s
 
+  # Redis — cache for Websurfx
+  redis-ws:
+    image: redis:7-alpine
+    container_name: param-redis-ws
+    restart: unless-stopped
+    networks: [param-net]
+    command: ["redis-server", "--port", "6382", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+
   # Websurfx — privacy-respecting meta search engine (Rust)
   websurfx:
     image: neonmmd/websurfx:latest
     container_name: param-websurfx
     restart: unless-stopped
-    network_mode: host
+    networks: [param-net]
+    ports:
+      - "127.0.0.1:8989:8989"
     volumes:
       - /home/Nasama-Pochu/param/deploy/nas/websurfx/config.lua:/etc/xdg/websurfx/config.lua:ro
     healthcheck:
@@ -104,9 +128,9 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      - vaultwarden
+      - redis-ws
 
-  # Cloudflare Tunnel — routes through nginx (port 8080)
+  # Cloudflare Tunnel — routes through nginx (host mode for Honcho access)
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: param-cloudflared

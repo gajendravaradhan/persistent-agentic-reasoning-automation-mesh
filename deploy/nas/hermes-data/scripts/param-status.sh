@@ -28,10 +28,33 @@ else
 fi
 
 # 3. TokenEye
-echo -n "  TokenEye:     "
+echo -ne "  TokenEye:     "
+TOK_EYE_DB="/home/Nasama-Pochu/param/tokeneye-config/metrics.db"
 if curl -s http://127.0.0.1:8787/__health > /dev/null 2>&1; then
-    RECORDS=$(curl -s http://127.0.0.1:8787/__health | python3 -c "import sys,json; print(json.load(sys.stdin)['recordCount'])" 2>/dev/null)
-    echo -e "${GREEN}RUNNING ($RECORDS records)${NC}"
+    TODAY=$(date +%Y-%m-%d)
+    HEALTH_JSON=$(curl -s http://127.0.0.1:8787/__health)
+    RECORD_COUNT=$(echo "$HEALTH_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['recordCount'])" 2>/dev/null)
+    ACTIVE=$(echo "$HEALTH_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(','.join([p for p,v in d.get('providers',{}).items() if v.get('keyCount',0)>0 or v.get('mode')=='passthrough']))" 2>/dev/null)
+    echo -e "${GREEN}RUNNING${NC}   (${RECORD_COUNT:-?} total records, active: ${ACTIVE:-auto})"
+    if [ -f "$TOK_EYE_DB" ] && command -v sqlite3 >/dev/null 2>&1; then
+        CALLS=$(sqlite3 "$TOK_EYE_DB" "SELECT COUNT(*) FROM metrics WHERE date(timestamp)='$TODAY' AND status=200" 2>/dev/null)
+        TOKENS=$(sqlite3 "$TOK_EYE_DB" "SELECT ROUND(SUM(total_tokens)) FROM metrics WHERE date(timestamp)='$TODAY' AND status=200" 2>/dev/null)
+        AVG_MS=$(sqlite3 "$TOK_EYE_DB" "SELECT ROUND(AVG(latency_ms)) FROM metrics WHERE date(timestamp)='$TODAY' AND status=200" 2>/dev/null)
+        COST=$(sqlite3 "$TOK_EYE_DB" "SELECT ROUND(SUM(COALESCE(estimated_cost,0)), 4) FROM metrics WHERE date(timestamp)='$TODAY'" 2>/dev/null)
+        ERRORS=$(sqlite3 "$TOK_EYE_DB" "SELECT COUNT(*) FROM metrics WHERE date(timestamp)='$TODAY' AND status!=200" 2>/dev/null)
+        printf "    └─ Today: %s calls, %s tokens, %s ms avg" "${CALLS:-0}" "${TOKENS:-0}" "${AVG_MS:-0}"
+        if [ "$COST" != "0.0" ] && [ -n "$COST" ]; then
+            printf ", \$%s cost" "$COST"
+        fi
+        echo ""
+        if [ "${ERRORS:-0}" != "0" ]; then
+            echo -e "       ${RED}Errors: $ERRORS${NC}"
+        fi
+        MODELS=$(sqlite3 "$TOK_EYE_DB" "SELECT model || '(' || COUNT(*) || ')' FROM metrics WHERE date(timestamp)='$TODAY' AND status=200 GROUP BY model" 2>/dev/null | tr '\n' ' ')
+        if [ -n "$MODELS" ]; then
+            echo "       Models: $MODELS"
+        fi
+    fi
 else
     echo -e "${RED}DOWN${NC}"
 fi
