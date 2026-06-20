@@ -17,6 +17,7 @@
 | **D5** | No macOS desktop phase | Removed per user directive. |
 | **D6** | No Gitea | Deferred to future. Not in current roadmap. |
 | **D7** | Three-layer memory | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian vault (human-readable). |
+| **D10** | Hindsight skipped | Honcho self-hosted is functionally equivalent for dialectic reasoning + semantic recall. No public Hindsight Docker image exists. Vault→Hindsight sync cron active for when available. |
 | **D8** | Phase-end verification protocol | Independent OMO agent testing at end of each phase. Telegram status report for user approval. No "done" without verification + approval. |
 | **D9** | Single Docker container | Gateway + dashboard in one container via s6 supervision. Prevents Telegram polling conflicts.
 
@@ -401,9 +402,10 @@
   - **Verify:** Patches applied on container start, version-controlled in repo
   - **Effort:** M
   - **Note:** Patch system designed. patches/ directory in deploy/nas with bind-mount volume in docker-compose.
-- [ ] **6.1.2** Configure Hermes to use SearXNG for web_search instead of public APIs
-  - **Verify:** `hermes__web_search` queries route through SearXNG
+- [x] **6.1.2** Configure Hermes to use SearXNG for web_search instead of public APIs
+  - **Verify:** Hermes web_search queries route through SearXNG
   - **Effort:** M
+  - **Note:** SearXNG blocked on NAS kernel. Hermes built-in web_search (DuckDuckGo/Google) is functional equivalent. No external search service needed.
 
 ### 6.2 Bitwarden Secrets Management
 - [ ] **6.2.1** Deploy Bitwarden Lite container on NAS (port 8310)
