@@ -1,40 +1,20 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
 addopts = "-v --tb=short --strict-markers"
-markers = [
-    "unit: Unit tests (fast, no external deps)",
-    "integration: Integration tests (may need Hermes MCP)",
-    "slow: Slow tests",
-]
 
 [tool.coverage.run]
 source = ["."]
-omit = [
-    "tests/*",
-    ".venv/*",
-    "deploy/*",
-    "vault/*",
-    "specs/*",
-    "configs/*",
-]
+omit = ["tests/*", ".venv/*", "deploy/*", "vault/*", "specs/*", "configs/*"]
 
 [tool.coverage.report]
 fail_under = 90
 show_missing = true
-exclude_lines = [
-    "pragma: no cover",
-    "if __name__ == .__main__.:",
-    "raise NotImplementedError",
-]
 
 [tool.coverage.branch]
 fail_under = 70
 
 [tool.mutmut]
-paths_to_mutate = ["param_hermes_mcp.py"]
+source_paths = ["param_hermes_mcp.py"]
 backup = false
 runner = "python -m pytest"
-tests_dir = "tests/"

@@ -405,7 +405,7 @@
 - [x] **6.1.2** Configure Hermes to use SearXNG for web_search instead of public APIs
   - **Verify:** Hermes web_search queries route through SearXNG
   - **Effort:** M
-  - **Note:** SearXNG blocked on NAS kernel. Hermes built-in web_search (DuckDuckGo/Google) is functional equivalent. No external search service needed.
+  - **Note:** Websurfx deployed (Rust, DuckDuckGo+Wikipedia, port 8989) as SearXNG replacement. Better privacy, memory-safe, lighter weight.
 
 ### 6.2 Bitwarden Secrets Management
 - [ ] **6.2.1** Deploy Bitwarden Lite container on NAS (port 8310)
