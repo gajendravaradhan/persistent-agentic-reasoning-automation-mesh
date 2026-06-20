@@ -17,7 +17,9 @@
 | **D5** | No macOS desktop phase | Removed per user directive. |
 | **D6** | No Gitea | Deferred to future. Not in current roadmap. |
 | **D7** | Three-layer memory | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian vault (human-readable). |
-| **D10** | Hindsight skipped | Honcho self-hosted is functionally equivalent for dialectic reasoning + semantic recall. No public Hindsight Docker image exists. Vault→Hindsight sync cron active for when available. |
+| **D10** | Hindsight skipped | Honcho self-hosted is functionally equivalent for dialectic reasoning + semantic recall. No public Hindsight Docker image exists.
+| **D11** | Docker network isolation | Skipped. Honcho runs natively (not Docker) — bridge networking would break memory layer. Home NAS behind NAT + Cloudflare tunnel: risk/reward not justified. Dashboard auth, secret isolation, and guardrails provide the real security.
+| **D12** | Langfuse observability | Add Langfuse for session traces, latency, cost tracking, error patterns. Phase 7 upgrade. Vault→Hindsight sync cron active for when available. |
 | **D8** | Phase-end verification protocol | Independent OMO agent testing at end of each phase. Telegram status report for user approval. No "done" without verification + approval. |
 | **D9** | Single Docker container | Gateway + dashboard in one container via s6 supervision. Prevents Telegram polling conflicts.
 
