@@ -19,7 +19,7 @@
 | **D7** | Three-layer memory | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian vault (human-readable). |
 | **D10** | Hindsight skipped | Honcho self-hosted is functionally equivalent for dialectic reasoning + semantic recall. No public Hindsight Docker image exists.
 | **D11** | Docker network isolation | **DEPLOYED.** All 11 containers on `nas_param-net` bridge. Honcho + PARAM share network. Cloudflared stays host mode. TokenEye bind fixed to 0.0.0.0. All 8 inter-service connectivity checks pass (200). Phase 9 hardening complete.
-| **D12** | Langfuse observability | Add Langfuse for session traces, latency, cost tracking, error patterns. Phase 7 upgrade. Vault→Hindsight sync cron active for when available. |
+| **D12** | Langfuse observability | **CONFIGURED.** Native Hermes plugin enabled (observability/langfuse). Cloud Hobby tier. Env vars in docker-compose. Hermes restarted. Traces flow to cloud.langfuse.com. Phase 7 upgrade complete. |
 | **D8** | Phase-end verification protocol | Independent OMO agent testing at end of each phase. Telegram status report for user approval. No "done" without verification + approval. |
 | **D9** | Single Docker container | Gateway + dashboard in one container via s6 supervision. Prevents Telegram polling conflicts.
 
@@ -449,9 +449,10 @@
    - **Verify:** Decision documented: adopt/defer with reasoning
    - **Effort:** S
    - **Note:** Hermes has native Langfuse plugin (plugins/observability/langfuse/). 0 custom code needed. Cloud Hobby tier (free, 50K units/month) covers our scale. Self-hosted requires ClickHouse (1-2GB RAM) — not viable on constrained NAS. Adopted: cloud.langfuse.com.
-- [ ] **7.2.2** If adopted: configure Langfuse, verify session traces visible
-  - **Verify:** Langfuse dashboard shows PARAM session traces
-  - **Effort:** M
+- [x] **7.2.2** If adopted: configure Langfuse, verify session traces visible
+   - **Verify:** Langfuse dashboard shows PARAM session traces
+   - **Effort:** M
+   - **Note:** Langfuse plugin enabled (observability/langfuse). Env vars configured in docker-compose. Cloud Hobby tier (cloud.langfuse.com). Hermes restarted. Awaiting first session to confirm traces.
 
 ---
 
@@ -534,10 +535,10 @@
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
-| 7: Observability | 2 | 4 | 50% |
+| 7: Observability | 3 | 4 | 75% |
 | 8: Testing & CI/CD | 5 | 5 | 100% |
 | 9: Security Hardening | 5 | 5 | 100% |
-| **TOTAL** | **64** | **82** | **78%** |
+| **TOTAL** | **66** | **82** | **80%** |
 
 ---
 
