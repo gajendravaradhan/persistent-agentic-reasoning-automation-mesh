@@ -43,11 +43,8 @@ services:
     restart: unless-stopped
     network_mode: host
     volumes:
+      - /home/Nasama-Pochu/param/deploy/nas/pwa:/pwa:ro
       - /home/Nasama-Pochu/param/deploy/nas/pwa/nginx.conf:/etc/nginx/nginx.conf:ro
-      - /home/Nasama-Pochu/param/deploy/nas/pwa/index.html:/pwa/index.html:ro
-      - /home/Nasama-Pochu/param/deploy/nas/pwa/manifest.json:/pwa/manifest.json:ro
-      - /home/Nasama-Pochu/param/deploy/nas/pwa/sw.js:/pwa/sw.js:ro
-      - /home/Nasama-Pochu/param/deploy/nas/pwa/.htpasswd:/pwa/.htpasswd:ro
     depends_on:
       - hermes
 
