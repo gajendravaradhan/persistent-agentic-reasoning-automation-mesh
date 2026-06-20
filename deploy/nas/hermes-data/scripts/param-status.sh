@@ -113,12 +113,29 @@ else
     echo -e "${RED}NOT MOUNTED${NC}"
 fi
 
-# 8. Cloudflare tunnel
+# 10. Cloudflare tunnel
 echo -n "  Tunnel:       "
 if ps aux 2>/dev/null | grep -q "[c]loudflared tunnel run param"; then
     echo -e "${GREEN}RUNNING${NC}"
 else
     echo -e "${YELLOW}DOWN${NC}"
+fi
+
+# 11. Intent Router (24/7 on NAS)
+echo -n "  Router:       "
+if docker exec param python3 -c "import sys; sys.path.insert(0,'/opt/data/router'); from router import classify_and_route" 2>/dev/null; then
+    echo -e "${GREEN}AVAILABLE${NC}"
+else
+    echo -e "${RED}MISSING${NC}"
+fi
+
+# 12. MacBook Worker Node
+echo -n "  MacBook:      "
+MACBOOK_HOST="${MACBOOK_HOST:-gajendra.local}"
+if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=3 -o BatchMode=yes "$MACBOOK_HOST" "echo ok" 2>/dev/null; then
+    echo -e "${GREEN}CONNECTED${NC}"
+else
+    echo -e "${YELLOW}UNAVAILABLE (NAS-only mode)${NC}"
 fi
 
 echo ""

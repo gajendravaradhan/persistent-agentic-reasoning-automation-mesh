@@ -36,6 +36,8 @@ services:
       # -- Vaultwarden Secrets --
       - BW_CLIENTID=REDACTED-BW-CLIENTID
       - BW_CLIENTSECRET=REDACTED-BW-SECRET
+      # PARAM router available at /opt/data/router/
+      # Import: sys.path.insert(0, "/opt/data/router"); from router import classify_and_route
     command: ["gateway", "run"]
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9119/", "-o", "/dev/null"]
