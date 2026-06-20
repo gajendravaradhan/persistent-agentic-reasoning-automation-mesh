@@ -54,8 +54,42 @@ critical TELEGRAM_BOT_TOKEN     "Telegram bot token from @BotFather"
 critical TELEGRAM_ALLOWED_USERS  "Comma-separated allowed Telegram user IDs"
 echo ""
 
-echo "TokenEye:"
-warn_if_missing OPENCODE_GO_API_KEY  "Primary LLM API key (managed-by-tokeneye)"
+echo "Provider Detection:"
+PROVIDER_FOUND=""
+PROVIDER_NAME=""
+if [ -n "${OPENCODE_GO_API_KEY:-}" ] && [ "${OPENCODE_GO_API_KEY}" != "managed-by-tokeneye" ]; then
+    PROVIDER_FOUND="tokeneye"
+    PROVIDER_NAME="TokenEye (opencode-go proxy)"
+    echo -e "  ${GREEN}✓${NC} $PROVIDER_NAME — key configured"
+elif [ -n "${OPENROUTER_API_KEY:-}" ]; then
+    PROVIDER_FOUND="openrouter"
+    PROVIDER_NAME="OpenRouter"
+    echo -e "  ${GREEN}✓${NC} $PROVIDER_NAME — key configured"
+elif [ -n "${OPENAI_COMPATIBLE_API_KEY:-}" ]; then
+    PROVIDER_FOUND="openai"
+    PROVIDER_NAME="OpenAI Compatible"
+    echo -e "  ${GREEN}✓${NC} $PROVIDER_NAME — key configured"
+elif [ "${OPENCODE_GO_API_KEY:-}" = "managed-by-tokeneye" ]; then
+    echo -e "  ${YELLOW}⚠${NC} TokenEye key is placeholder 'managed-by-tokeneye' — if TokenEye is running separately, this is OK"
+    PROVIDER_NAME="TokenEye (managed)"
+else
+    echo -e "  ${RED}✗${NC} No LLM provider configured! Set one of: OPENCODE_GO_API_KEY, OPENROUTER_API_KEY, OPENAI_COMPATIBLE_API_KEY"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# Validate the detected provider key
+case "$PROVIDER_FOUND" in
+    openrouter)
+        if [[ "${OPENROUTER_API_KEY}" != sk-or-* ]]; then
+            echo -e "  ${YELLOW}⚠${NC} OPENROUTER_API_KEY — should start with sk-or-"
+        fi
+        ;;
+    openai)
+        if [[ "${OPENAI_COMPATIBLE_API_KEY}" != sk-* ]]; then
+            echo -e "  ${YELLOW}⚠${NC} OPENAI_COMPATIBLE_API_KEY — should start with sk-"
+        fi
+        ;;
+esac
 echo ""
 
 echo "Langfuse (optional):"
