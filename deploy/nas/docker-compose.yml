@@ -38,15 +38,18 @@ services:
     network_mode: host
     working_dir: /app
     volumes:
-      - /home/Nasama-Pochu/param/tokeneye:/app-src:ro
+      - /home/Nasama-Pochu/param/tokeneye/src:/app/src:ro
+      - /home/Nasama-Pochu/param/tokeneye/package.json:/app/package.json:ro
+      - /home/Nasama-Pochu/param/tokeneye/tsconfig.json:/app/tsconfig.json:ro
       - /home/Nasama-Pochu/param/tokeneye-config:/root/.config/tokeneye
-    command: ["sh", "-c", "mkdir -p /app/work && cp /app-src/* /app/work/ 2>/dev/null; cd /app/work && bun install && exec bun run src/index.ts"]
+      - tokeneye_modules:/app/node_modules
+    command: ["sh", "-c", "[ -f node_modules/.package-lock.json ] || bun install --frozen-lockfile; exec bun run src/index.ts"]
     healthcheck:
       test: ["CMD", "sh", "-c", "curl -sf http://localhost:8787/__health || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 120s
+      retries: 5
+      start_period: 180s
 
   # Nginx — PWA + basic auth reverse proxy for dashboard
   nginx:
@@ -97,3 +100,6 @@ services:
     command: ["tunnel", "--config", "/home/nonroot/.cloudflared/config.yml", "run"]
     depends_on:
       - nginx
+
+volumes:
+  tokeneye_modules:
