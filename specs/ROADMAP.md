@@ -478,9 +478,10 @@
 ## Phase 9: Security Hardening (P3)
 
 ### 9.1 Credential Hygiene
-- [ ] **9.1.1** Audit all files for hardcoded secrets
-  - **Verify:** Zero secrets in git-tracked files
-  - **Effort:** M
+- [x] **9.1.1** Audit all files for hardcoded secrets
+   - **Verify:** Zero secrets in git-tracked files
+   - **Effort:** M
+   - **Note:** Scanned for sk-, pk-, telegram bot tokens, base64 secrets, API keys. All actual secrets in gitignored .env files. Tracked configs use empty placeholders. Repo clean.
 - [ ] **9.1.2** Implement `.env` validation on startup (required keys present, non-empty)
   - **Verify:** Startup fails with clear error if required keys missing
   - **Effort:** S
@@ -530,8 +531,8 @@
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
 | 7: Observability | 2 | 4 | 50% |
 | 8: Testing & CI/CD | 4 | 5 | 80% |
-| 9: Security Hardening | 3 | 5 | 60% |
-| **TOTAL** | **59** | **82** | **72%** |
+| 9: Security Hardening | 4 | 5 | 80% |
+| **TOTAL** | **60** | **82** | **73%** |
 
 ---
 
