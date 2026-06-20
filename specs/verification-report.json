@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-20T02:58:22.268884",
-  "verified": 50,
-  "failed": 0,
+  "timestamp": "2026-06-20T03:14:21.138988",
+  "verified": 49,
+  "failed": 1,
   "manual": 6,
   "total_claimed": 56,
   "results": [
@@ -122,8 +122,8 @@
     {
       "id": "0.5.3",
       "claimed": "completed",
-      "verified": true,
-      "reason": "git status clean"
+      "verified": false,
+      "reason": "git has uncommitted changes"
     },
     {
       "id": "1.1.1",
