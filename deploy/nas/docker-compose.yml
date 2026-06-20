@@ -27,12 +27,12 @@ services:
       - HERMES_DASHBOARD=1
       - HERMES_DASHBOARD_HOST=0.0.0.0
       - HERMES_DASHBOARD_INSECURE=1
-      # -- Langfuse Observability (uncomment when keys obtained from cloud.langfuse.com) --
-      # - HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-...
-      # - HERMES_LANGFUSE_SECRET_KEY=sk-lf-...
-      # - HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com
-      # - HERMES_LANGFUSE_ENV=production
-      # - HERMES_LANGFUSE_SAMPLE_RATE=1.0
+      # -- Langfuse Observability --
+      - HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-5a182e66-4468-4095-aa89-6434e8a3a372
+      - HERMES_LANGFUSE_SECRET_KEY=sk-lf-0a2967ac-228b-4c5c-a966-5755f8664829
+      - HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com
+      - HERMES_LANGFUSE_ENV=production
+      - HERMES_LANGFUSE_SAMPLE_RATE=1.0
     command: ["gateway", "run"]
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9119/", "-o", "/dev/null"]
@@ -60,7 +60,7 @@ services:
       - tokeneye_modules:/app/node_modules
     command: ["sh", "-c", "[ -f node_modules/.package-lock.json ] || bun install --frozen-lockfile; exec bun run src/index.ts"]
     healthcheck:
-      test: ["CMD", "sh", "-c", "curl -sf http://localhost:8787/__health || exit 1"]
+      test: ["CMD", "bun", "-e", "await fetch('http://localhost:8787/__health')"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -81,7 +81,7 @@ services:
       - hermes
       - vaultwarden
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9090/"]
+      test: ["CMD", "curl", "-sf", "http://localhost:9090/", "-o", "/dev/null"]
       interval: 30s
       timeout: 10s
       retries: 3
