@@ -66,6 +66,26 @@ services:
       retries: 3
       start_period: 10s
 
+  # Vaultwarden — lightweight Bitwarden-compatible secrets vault
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: param-vaultwarden
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /home/Nasama-Pochu/param/vaultwarden-data:/data
+    environment:
+      - SIGNUPS_ALLOWED=false
+      - WEBSOCKET_ENABLED=true
+      - DOMAIN=https://vault.param.aiforges.app
+      - ROCKET_PORT=8311
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8311/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # Cloudflare Tunnel — routes through nginx (port 8080)
   cloudflared:
     image: cloudflare/cloudflared:latest
