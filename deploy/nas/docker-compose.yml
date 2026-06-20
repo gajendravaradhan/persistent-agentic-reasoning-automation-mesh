@@ -33,6 +33,9 @@ services:
       - HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com
       - HERMES_LANGFUSE_ENV=production
       - HERMES_LANGFUSE_SAMPLE_RATE=1.0
+      # -- Vaultwarden Secrets --
+      - BW_CLIENTID=REDACTED-BW-CLIENTID
+      - BW_CLIENTSECRET=REDACTED-BW-SECRET
     command: ["gateway", "run"]
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9119/", "-o", "/dev/null"]
