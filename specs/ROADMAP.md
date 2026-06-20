@@ -320,9 +320,10 @@
 - [ ] **3.2.2** Implement event-driven notifications (TokenEye anomaly, kanban stall, memory bloat)
   - **Verify:** Each event type triggers appropriate notification
   - **Effort:** M
-- [ ] **3.2.3** Implement diff-based Telegram alerts (only notify on state change — Reddit pattern)
-  - **Verify:** Consecutive identical status reports don't trigger duplicate messages
-  - **Effort:** M
+- [x] **3.2.3** Implement diff-based Telegram alerts (only notify on state change — Reddit pattern)
+   - **Verify:** Consecutive identical status reports don't trigger duplicate messages
+   - **Effort:** M
+   - **Note:** State file at /opt/data/state/notify-state.json. Updated notification-controller cron prompt (826 chars) with explicit diff logic: compare current state against last_state, suppress identical reports, enforce cooldowns (WARNING 30min, CRITICAL 5min), never send all-clear messages. Deployed to NAS, gateway restarted.
 
 ### 3.3 launchd-Style Persistence on NAS
 - [x] **3.3.1** Verify Docker `restart: unless-stopped` handles container crashes
@@ -527,14 +528,14 @@
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 3 | 11 | 27% |
-| 3: Autonomous NAS Ops | 5 | 10 | 50% |
+| 3: Autonomous NAS Ops | 6 | 10 | 60% |
 | 4: OMO Agent Dispatcher | 5 | 9 | 56% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 2 | 8 | 25% |
 | 7: Observability | 2 | 4 | 50% |
 | 8: Testing & CI/CD | 5 | 5 | 100% |
 | 9: Security Hardening | 5 | 5 | 100% |
-| **TOTAL** | **62** | **82** | **76%** |
+| **TOTAL** | **63** | **82** | **77%** |
 
 ---
 
