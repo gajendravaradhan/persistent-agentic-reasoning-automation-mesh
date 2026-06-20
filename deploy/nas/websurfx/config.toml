@@ -1,0 +1,10 @@
+port = 8989
+binding_ip = "0.0.0.0"
+production_use = false
+request_timeout = 15
+safe_search = 2
+
+[upstream_search_engines]
+DuckDuckGo = true
+Brave = false
+Startpage = false
