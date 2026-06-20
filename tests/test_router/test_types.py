@@ -13,9 +13,9 @@ class TestIntentEnum:
     def test_all_intents_defined(self):
         from router.types import Intent
         expected = [
-            "CODE_SEARCH", "CODE_CHANGE", "MEMORY_RETRIEVAL", "MEMORY_WRITE",
-            "INFRASTRUCTURE", "DEPLOYMENT", "SECURITY", "CASUAL_CHAT",
-            "ANALYSIS", "MULTI_INTENT", "UNKNOWN",
+            "code_search", "code_change", "memory", "memory_write",
+            "infra", "deploy", "security", "casual",
+            "analysis", "multi", "unknown",
         ]
         values = [i.value for i in Intent]
         for e in expected:
