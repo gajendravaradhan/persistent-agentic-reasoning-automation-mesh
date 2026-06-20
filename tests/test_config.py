@@ -42,12 +42,25 @@ class TestConfigYAMLValidation:
         assert "hermes" in cfg["services"]
         assert "tokeneye" in cfg["services"]
 
-    def test_docker_compose_has_network_host(self):
+    def test_docker_compose_network_isolation(self):
+        """All non-cloudflared services use bridge network, cloudflared stays host."""
         path = os.path.join(PROJECT_ROOT, "deploy/nas/docker-compose.yml")
         with open(path) as f:
             cfg = yaml.safe_load(f)
-        for svc in ["hermes", "tokeneye"]:
-            assert cfg["services"][svc]["network_mode"] == "host"
+        # Bridge network defined
+        assert "networks" in cfg
+        assert "param-net" in cfg["networks"]
+        assert cfg["networks"]["param-net"]["driver"] == "bridge"
+        # Non-cloudflared services on bridge
+        bridge_services = ["hermes", "tokeneye", "nginx", "vaultwarden", "websurfx", "redis-ws"]
+        for svc in bridge_services:
+            assert "networks" in cfg["services"][svc], f"{svc} missing networks key"
+            assert "param-net" in cfg["services"][svc]["networks"], f"{svc} not on param-net"
+        # Cloudflared stays host mode
+        assert cfg["services"]["cloudflared"]["network_mode"] == "host"
+        # Port mappings for exposed services
+        assert cfg["services"]["hermes"]["ports"] is not None
+        assert cfg["services"]["tokeneye"]["ports"] is not None
 
     def test_docker_compose_restart_policy(self):
         path = os.path.join(PROJECT_ROOT, "deploy/nas/docker-compose.yml")
