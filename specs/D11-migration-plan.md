@@ -50,6 +50,12 @@ networks:
   param-net:
     external: true
 
+# ADD container_name to API service (for stable DNS on param-net):
+#   api:
+#     build: ...
+#     container_name: honcho-api    ← ADD THIS LINE
+#     entrypoint: ...
+
 # ADD to EACH of these services: api, deriver, database, redis
 # (after their existing config, before the next service):
     networks:
@@ -60,15 +66,25 @@ networks:
 ### 4. Cloudflare tunnel config: `/home/Nasama-Pochu/.cloudflared/config.yml`
 ```
 # NO CHANGES NEEDED — cloudflared stays in host mode, uses localhost
+# Note: cloudflared could use Docker DNS if moved to bridge, but host mode
+# avoids config.yml changes and ensures outbound tunnel stability.
 ```
 
-## Deploy Sequence
+## Deploy Sequence (REVISED — avoids broken intermediary state)
 1. `docker network create param-net` on NAS
-2. `docker compose -f /home/Nasama-Pochu/param/honcho/docker-compose.yml down && up -d`
-3. Edit hermes config.yaml → restart Hermes container
-4. Edit websurfx config.lua → restart Websurfx
-5. Replace nginx.conf on NAS → restart nginx
-6. `docker compose -f deploy/nas/docker-compose.yml down && up -d` (PARAM services)
+2. Edit all config files (hermes config.yaml, websurfx config.lua, nginx.conf) — **DO NOT RESTART YET**
+3. Edit Honcho docker-compose: add `param-net` external network + `container_name: honcho-api`
+4. `docker compose -f /home/Nasama-Pochu/param/honcho/docker-compose.yml down && up -d`
+5. `docker compose -f deploy/nas/docker-compose.yml down && up -d` (PARAM services pick up new configs)
 
 ## Rollback
-If anything fails: restore original docker-compose (network_mode: host for all), restore nginx.conf (127.0.0.1), `docker compose up -d`
+If anything fails:
+1. `docker compose -f deploy/nas/docker-compose.yml down`
+2. Restore original docker-compose (network_mode: host for all non-cloudflared)
+3. Restore nginx.conf (127.0.0.1 references)
+4. Restore hermes config.yaml (localhost:8000 for honcho, 127.0.0.1:8787 for model)
+5. Restore websurfx config.lua (127.0.0.1:6382)
+6. Remove `param-net` from Honcho compose, remove `container_name: honcho-api`
+7. `docker compose -f honcho/docker-compose.yml down && up -d`
+8. `docker compose -f deploy/nas/docker-compose.yml up -d`
+9. `docker network rm param-net` (cleanup)

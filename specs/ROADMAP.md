@@ -18,7 +18,7 @@
 | **D6** | No Gitea | Deferred to future. Not in current roadmap. |
 | **D7** | Three-layer memory | Honcho (dialectic) + Hindsight/pgvector (semantic) + Obsidian vault (human-readable). |
 | **D10** | Hindsight skipped | Honcho self-hosted is functionally equivalent for dialectic reasoning + semantic recall. No public Hindsight Docker image exists.
-| **D11** | Docker network isolation | Replace `network_mode: host` with bridge network + explicit port mappings. Honcho confirmed Dockerized (4 containers) — no native blocker. Phase 9 hardening.
+| **D11** | Docker network isolation | **DEPLOYED.** All 11 containers on `nas_param-net` bridge. Honcho + PARAM share network. Cloudflared stays host mode. TokenEye bind fixed to 0.0.0.0. All 8 inter-service connectivity checks pass (200). Phase 9 hardening complete.
 | **D12** | Langfuse observability | Add Langfuse for session traces, latency, cost tracking, error patterns. Phase 7 upgrade. Vault→Hindsight sync cron active for when available. |
 | **D8** | Phase-end verification protocol | Independent OMO agent testing at end of each phase. Telegram status report for user approval. No "done" without verification + approval. |
 | **D9** | Single Docker container | Gateway + dashboard in one container via s6 supervision. Prevents Telegram polling conflicts.
