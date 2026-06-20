@@ -433,6 +433,51 @@ The routing decision ("which subsystem handles this?") is internal to PARAM. Fro
 
 ---
 
+## Deployment Architecture (Tiered)
+
+PARAM operates on a two-tier architecture for 24/7 availability:
+
+```
+┌─────────────────────────────────────────────┐
+│  NAS (24/7 Always-On Tier) — UGREEN Docker  │
+│                                             │
+│  ✅ Hermes Gateway + Dashboard              │
+│  ✅ 13 Autonomous Cron Jobs                 │
+│  ✅ Honcho Memory (dialectic reasoning)     │
+│  ✅ TokenEye Proxy (LLM load balancing)     │
+│  ✅ Langfuse Observability (tracing)        │
+│  ✅ Intent Router (classify_and_route)      │
+│  ✅ Diff-based Notification System          │
+│  ✅ Vaultwarden Secrets Vault               │
+│  ✅ Websurfx Private Search                 │
+│  ✅ Cloudflared Tunnel (host mode)          │
+│  ✅ Docker Bridge Network (nas_param-net)   │
+│  ✅ .env Validator + Health Checks          │
+│                                             │
+│  Available 24/7, MacBook independent.       │
+│  15 Docker containers, 10 on bridge.        │
+└─────────────────────────────────────────────┘
+                         │
+                         │ Cloudflare tunnel
+                         ▼
+┌─────────────────────────────────────────────┐
+│  MacBook / VPS (Worker Tier) — Optional     │
+│                                             │
+│  🔵 OMO Agents (explore, oracle, librarian) │
+│  🔵 opencode-cli Session Runtime            │
+│  🔵 Team Mode Agent Orchestration           │
+│  🔵 Full Test Suite (59 tests, 92% coverage)│
+│  🔵 verify-roadmap.py (NAS SSH context)     │
+│                                             │
+│  Used when available. Detected via          │
+│  check-macbook.sh (SSH health probe).       │
+│  When unavailable, NAS operates             │
+│  autonomously with full feature set.        │
+└─────────────────────────────────────────────┘
+```
+
+**Availability guarantee**: PARAM is 24/7 with or without the worker node. The NAS tier handles all core functions: messaging, memory, cron, observability, intent routing, and notifications. The worker node provides OMO agent-based heavy compute when online. `check-macbook.sh` detects worker availability. When offline, PARAM falls back to direct LLM via Hermes + TokenEye.
+
 ## Security Considerations
 
 ### Execution Model
