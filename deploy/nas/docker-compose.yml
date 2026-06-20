@@ -1,11 +1,6 @@
 #
-# PARAM / Hermes NAS Docker Deployment
-# ====================================
-# Target: Ugreen NAS with Docker Compose
-# Image:  nousresearch/hermes-agent:latest (public Docker Hub)
-#
-# All services use restart: unless-stopped for NAS reboot survival.
-# Cloudflared runs in Docker instead of natively — no systemd/sudo needed.
+# PARAM Docker Deployment — UGREEN NAS
+# All services use restart: unless-stopped for boot survival.
 
 services:
   # Hermes — gateway + dashboard via s6 supervision
@@ -23,13 +18,13 @@ services:
       - HERMES_UID=${HERMES_UID:-1000}
       - HERMES_GID=${HERMES_GID:-1000}
       - HERMES_DASHBOARD=1
-      - HERMES_DASHBOARD_HOST=127.0.0.1
-      - HERMES_DASHBOARD_INSECURE=0
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_INSECURE=1
     command: ["gateway", "run"]
     depends_on:
       - tokeneye
 
-  # TokenEye — LLM proxy with load balancing between opencode-go accounts
+  # TokenEye — LLM proxy with 2-key opencode-go load balancing
   tokeneye:
     image: oven/bun:latest
     container_name: param-tokeneye
@@ -41,16 +36,22 @@ services:
       - /home/Nasama-Pochu/param/tokeneye-config:/root/.config/tokeneye
     command: ["sh", "-c", "mkdir -p /app/work && cp /app-src/* /app/work/ 2>/dev/null; cd /app/work && bun install && exec bun run src/index.ts"]
 
-  # SearXNG — private search engine
-  searxng:
-    image: searxng/searxng:latest
-    container_name: param-searxng
+  # Nginx — PWA + basic auth reverse proxy for dashboard
+  nginx:
+    image: nginx:alpine
+    container_name: param-nginx
     restart: unless-stopped
     network_mode: host
-    environment:
-      - SEARXNG_BIND_ADDRESS=0.0.0.0:8889
-      - SEARXNG_BASE_URL=http://localhost:8889/
-      - SEARXNG_SECRET=PARAM-searxng-secret-change-me — auto-starts on NAS reboot via Docker restart policy
+    volumes:
+      - /home/Nasama-Pochu/param/deploy/nas/pwa/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /home/Nasama-Pochu/param/deploy/nas/pwa/index.html:/pwa/index.html:ro
+      - /home/Nasama-Pochu/param/deploy/nas/pwa/manifest.json:/pwa/manifest.json:ro
+      - /home/Nasama-Pochu/param/deploy/nas/pwa/sw.js:/pwa/sw.js:ro
+      - /home/Nasama-Pochu/param/deploy/nas/pwa/.htpasswd:/pwa/.htpasswd:ro
+    depends_on:
+      - hermes
+
+  # Cloudflare Tunnel — routes through nginx (port 8080)
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: param-cloudflared
@@ -60,4 +61,4 @@ services:
       - /home/Nasama-Pochu/.cloudflared:/home/nonroot/.cloudflared:ro
     command: ["tunnel", "--config", "/home/nonroot/.cloudflared/config.yml", "run"]
     depends_on:
-      - hermes
+      - nginx

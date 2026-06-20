@@ -1,27 +1,14 @@
-# Cloudflare Tunnel configuration for PARAM
-# Domain: *.aiforges.app
-# Generated: 2026-06-19
-#
-# This file is deployed to NAS at ~/.cloudflared/config.yml
-# by cloudflared-setup.sh. Do not edit on NAS directly —
-# it is managed from the PARAM repo.
-
-tunnel: 9be6d675-748b-490f-9111-43d7cbd66958
-credentials-file: /home/nonroot/.cloudflared/9be6d675-748b-490f-9111-43d7cbd66958.json
+tunnel: 225ed34b-3be5-4301-863e-1802552fa082
+credentials-file: /home/nonroot/.cloudflared/225ed34b-3be5-4301-863e-1802552fa082.json
 origin-cert: /home/nonroot/.cloudflared/cert.pem
 
 ingress:
-  # PARAM Hermes Dashboard
   - hostname: param.aiforges.app
-    service: http://localhost:9119
-
-  # PARAM API / Health endpoint (for MCP bridge remote access)
+    service: http://localhost:9090
   - hostname: api.param.aiforges.app
-    service: http://localhost:9119
-
-  # TokenEye Dashboard
+    service: http://localhost:9090
+  - hostname: hook.param.aiforges.app
+    service: http://localhost:8000
   - hostname: tokeneye.aiforges.app
     service: http://localhost:8788
-
-  # Catch-all: reject unmatched hostnames
   - service: http_status:404

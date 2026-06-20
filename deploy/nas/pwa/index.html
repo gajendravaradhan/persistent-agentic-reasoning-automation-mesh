@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#6366f1">
+  <link rel="manifest" href="/manifest.json">
+  <title>PARAM — Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0f; color: #e0e0e0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .login { background: #141420; padding: 40px; border-radius: 16px; border: 1px solid #2a2a40; width: 100%; max-width: 380px; text-align: center; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #6366f1; }
+    p { color: #888; margin-bottom: 24px; font-size: 14px; }
+    input { width: 100%; padding: 14px; margin-bottom: 16px; background: #0a0a0f; border: 1px solid #2a2a40; border-radius: 10px; color: #fff; font-size: 16px; outline: none; }
+    input:focus { border-color: #6366f1; }
+    button { width: 100%; padding: 14px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #5558e6; }
+    .error { color: #f87171; margin-top: 12px; font-size: 13px; display: none; }
+    #install { margin-top: 16px; background: transparent; border: 1px solid #6366f1; color: #6366f1; display: none; }
+  </style>
+</head>
+<body>
+  <div class="login">
+    <h1>⚡ PARAM</h1>
+    <p>Persistent Agentic Reasoning Automation Mesh</p>
+    <form id="form" method="post">
+      <input type="password" id="pw" name="password" placeholder="Enter password" autofocus>
+      <div class="error" id="error">Invalid password</div>
+      <button type="submit">Access PARAM</button>
+    </form>
+    <button id="install" onclick="installPWA()">📲 Install App</button>
+  </div>
+  <script>
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install').style.display = 'block';
+    });
+    function installPWA() {
+      if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+    }
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      window.location.href = '/dashboard';
+    }
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pw = document.getElementById('pw').value;
+      // Basic auth: try to fetch dashboard, if 401 show error
+      try {
+        const r = await fetch('/dashboard', { headers: { 'Authorization': 'Basic ' + btoa('param:' + pw) } });
+        if (r.ok) {
+          sessionStorage.setItem('auth', btoa('param:' + pw));
+          window.location.href = '/dashboard';
+        } else {
+          document.getElementById('error').style.display = 'block';
+        }
+      } catch {
+        document.getElementById('error').style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
