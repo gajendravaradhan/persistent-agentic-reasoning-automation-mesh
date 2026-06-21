@@ -45,7 +45,7 @@
   - **Verify:** Audit entries written to file, readable, parseable
 - [ ] **IR-0.5.2** Implement `get_stats()` — accuracy, confidence distribution, route distribution
   - **Verify:** Stats function returns valid dict with all required fields
-- [ ] **IR-0.5.3** Implement request de-duplication via SHA256 hash
+- [x] **IR-0.5.3** Implement request de-duplication via SHA256 hash
   - **Verify:** Same request twice → single audit entry (de-duped)
 
 ### IR-0.6 Router Orchestrator
@@ -82,15 +82,15 @@
   - **Note:** 59/59 tests pass, 92% coverage. types.py=100%, routes.py=100%, classifier.py=96%, guard.py=90%, __init__.py=88%, audit.py=84%.
 
 ### IR-1.2 Edge Case Hardening
-- [ ] **IR-1.2.1** Empty request → UNKNOWN, routed to LLM
+- [x] **IR-1.2.1** Empty request → UNKNOWN, routed to LLM
   - **Verify:** "" → confidence 0.0, route FALLBACK_LLM
-- [ ] **IR-1.2.2** Very long request (>2000 chars) → truncated, classified on first 500
+- [x] **IR-1.2.2** Very long request (>2000 chars) → truncated, classified on first 500
   - **Verify:** 3000-char request classified correctly from first 500 chars
-- [ ] **IR-1.2.3** Mixed-language requests → handled gracefully
+- [x] **IR-1.2.3** Mixed-language requests → handled gracefully
   - **Verify:** "deploy करना है" → detected as INFRASTRUCTURE
-- [ ] **IR-1.2.4** Rapid repeated classification → cache hit, no re-classification
+- [x] **IR-1.2.4** Rapid repeated classification → cache hit, no re-classification
   - **Verify:** Same request 5x in 1 second → 1 audit entry, 5 cache hits
-- [ ] **IR-1.2.5** No regex catastrophic backtracking — all patterns bounded
+- [x] **IR-1.2.5** No regex catastrophic backtracking — all patterns bounded
   - **Verify:** Timeout test: worst-case input classifies in < 100ms
 
 ---
@@ -132,10 +132,10 @@
 
 | Phase | Completed | Total | % |
 |-------|-----------|-------|---|
-| IR-0: Foundation | 16 | 17 | 94% |
-| IR-1: Quality & Safety | 1 | 14 | 7% |
+| IR-0: Foundation | 17 | 17 | 100% |
+| IR-1: Quality & Safety | 6 | 14 | 43% |
 | IR-2: Integration | 0 | 5 | 0% |
-| **TOTAL** | **17** | **36** | **47%** |
+| **TOTAL** | **23** | **36** | **64%** |
 
 ---
 
