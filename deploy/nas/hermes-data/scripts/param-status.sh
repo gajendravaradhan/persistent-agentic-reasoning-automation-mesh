@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # PARAM Status Checker — container-aware version (Docker on NAS)
 # Uses /opt/data/ instead of ~/.hermes/ for container compatibility
+# NOTE: All inter-service checks use Docker service hostnames (NOT 127.0.0.1/localhost)
+#       127.0.0.1 inside the param container refers to the container itself, not other services.
+#       Correct hostnames (from docker-compose.yml):
+#         TokenEye  → tokeneye:8787
+#         Honcho    → api:8000
+#         Dashboard → localhost:9119  (same container, this one is correct)
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,18 +32,19 @@ fi
 
 # 2. Dashboard
 echo -n "  Dashboard:    "
-if curl -s http://localhost:9119/ > /dev/null 2>&1; then
+if curl -sf http://localhost:9119/ -o /dev/null 2>&1; then
     echo -e "${GREEN}RUNNING${NC}"
 else
     echo -e "${RED}DOWN${NC}"
 fi
 
-# 3. TokenEye
+# 3. TokenEye — use Docker service hostname, NOT 127.0.0.1
 echo -ne "  TokenEye:     "
+TOKENEYE_URL="http://tokeneye:8787"
 TOK_EYE_DB="/home/Nasama-Pochu/param/tokeneye-config/metrics.db"
-if curl -s http://127.0.0.1:8787/__health > /dev/null 2>&1; then
+if curl -sf "${TOKENEYE_URL}/__health" -o /dev/null 2>&1; then
     TODAY=$(date +%Y-%m-%d)
-    HEALTH_JSON=$(curl -s http://127.0.0.1:8787/__health)
+    HEALTH_JSON=$(curl -s "${TOKENEYE_URL}/__health")
     RECORD_COUNT=$(echo "$HEALTH_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['recordCount'])" 2>/dev/null)
     ACTIVE=$(echo "$HEALTH_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(','.join([p for p,v in d.get('providers',{}).items() if v.get('keyCount',0)>0 or v.get('mode')=='passthrough']))" 2>/dev/null)
     echo -e "${GREEN}RUNNING${NC}   (${RECORD_COUNT:-?} total records, active: ${ACTIVE:-auto})"
@@ -88,9 +95,9 @@ else
     echo -e "${YELLOW}NOT RUNNING${NC}"
 fi
 
-# 7. Memory (Honcho)
+# 7. Memory (Honcho) — use Docker service hostname, NOT localhost
 echo -n "  Honcho:       "
-if curl -s http://localhost:8000/health > /dev/null 2>&1; then
+if curl -sf http://api:8000/health -o /dev/null 2>&1; then
     echo -e "${GREEN}HEALTHY${NC}"
 else
     echo -e "${RED}DOWN${NC}"
@@ -113,29 +120,15 @@ else
     echo -e "${RED}NOT MOUNTED${NC}"
 fi
 
-# 10. Cloudflare tunnel
+# 10. Cloudflare Tunnel — check via Docker socket (tunnel runs in param-cloudflared container)
+#     Cannot use pgrep — cloudflared is in a SEPARATE container, not visible to ps aux here.
+#     Check: hit a known tunnel-exposed endpoint and verify HTTP response.
 echo -n "  Tunnel:       "
-if ps aux 2>/dev/null | grep -q "[c]loudflared tunnel run param"; then
-    echo -e "${GREEN}RUNNING${NC}"
+TUNNEL_CHECK=$(curl -sf -o /dev/null -w "%{http_code}" "https://param.aiforges.app/" --max-time 5 2>/dev/null)
+if [ "$TUNNEL_CHECK" = "200" ] || [ "$TUNNEL_CHECK" = "302" ] || [ "$TUNNEL_CHECK" = "301" ]; then
+    echo -e "${GREEN}RUNNING${NC} (param.aiforges.app reachable)"
 else
-    echo -e "${YELLOW}DOWN${NC}"
-fi
-
-# 11. Intent Router (24/7 on NAS)
-echo -n "  Router:       "
-if docker exec param python3 -c "import sys; sys.path.insert(0,'/opt/data/router'); from router import classify_and_route" 2>/dev/null; then
-    echo -e "${GREEN}AVAILABLE${NC}"
-else
-    echo -e "${RED}MISSING${NC}"
-fi
-
-# 12. MacBook Worker Node
-echo -n "  MacBook:      "
-MACBOOK_HOST="${MACBOOK_HOST:-gajendra.local}"
-if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=3 -o BatchMode=yes "$MACBOOK_HOST" "echo ok" 2>/dev/null; then
-    echo -e "${GREEN}CONNECTED${NC}"
-else
-    echo -e "${YELLOW}UNAVAILABLE (NAS-only mode)${NC}"
+    echo -e "${RED}DOWN${NC} (param.aiforges.app returned: ${TUNNEL_CHECK:-timeout})"
 fi
 
 echo ""
