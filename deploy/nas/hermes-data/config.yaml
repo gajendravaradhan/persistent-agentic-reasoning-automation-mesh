@@ -334,6 +334,17 @@ cron:
       == 0, exit silently without sending any message.'
     schedule: 0 10 1 * *
     skills: []
+  - enabled: true
+    name: autoheal
+    no_agent: true
+    schedule: '*/5 * * * *'
+    script: autoheal.sh
+  - enabled: true
+    name: secret-rotation-reminder
+    prompt: 'Annual secret rotation check: TELEGRAM_BOT_TOKEN, DISCORD_BOT_TOKEN, WEBHOOK_SECRET.
+      Check if any key is >365 days old. Alert user if rotation needed. No report if all current.'
+    schedule: 0 0 1 1 *
+    skills: []
   max_parallel_jobs: null
   tick_interval_seconds: 60
   wrap_response: true

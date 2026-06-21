@@ -513,10 +513,11 @@
    - **Verify:** Non-whitelisted users get polite rejection
    - **Effort:** S
    - **Note:** TELEGRAM_ALLOWED_USERS configured in .env (7373743118). Hermes gateway enforces whitelist at connection time. Verified via config.yaml gateway.platforms.telegram configuration.
-- [ ] **9.2.2** Implement Cloudflare Access for dashboard (Zero Trust)
+- [x] **9.2.2** Implement Cloudflare Access for dashboard (Zero Trust)
   - **Verify:** Dashboard requires authentication beyond tunnel
   - **Effort:** M
   - **Note (MANUAL REQUIRED):** Cloudflare dashboard operation — cannot be automated. Steps: (1) Go to dash.cloudflare.com → Zero Trust → Access → Applications → Add application → Self-hosted. (2) Set Application Domain to `param.aiforges.app`. (3) Add policy: Include → Emails → your email address. (4) Save. Hermes dashboard at `param.aiforges.app` will then require CF Access login before showing content. No code changes needed.
+  - **Note:** Cloudflare Zero Trust Access enabled by user. Application policy configured on param.aiforges.app. Dashboard now requires CF Access login.
 
 ---
 
@@ -552,8 +553,8 @@
 | 6: Advanced Infrastructure | 3 | 8 | 38% |
 | 7: Observability | 4 | 4 | 100% |
 | 8: Testing & CI/CD | 1 | 5 | 20% |
-| 9: Security Hardening | 4 | 5 | 80% |
-| **TOTAL** | **68** | **82** | **83%** |
+| 9: Security Hardening | 5 | 5 | 100% |
+| **TOTAL** | **69** | **82** | **84%** |
 
 ---
 
