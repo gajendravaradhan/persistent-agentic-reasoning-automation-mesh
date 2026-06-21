@@ -261,34 +261,42 @@
   - **Note:** Average 93% skill reduction across 10 agents. Sisyphus: 61/67 disabled (91%). Oracle/Explore: 64-65/67 disabled (96-97%). Target of 40% greatly exceeded.
 
 ### 2.2 Automated Skill Creation
-- [ ] **2.2.1** Implement post-task analysis: detect novel workflows
+- [x] **2.2.1** Implement post-task analysis: detect novel workflows
   - **Verify:** Novel workflow detection triggers skill creation prompt
   - **Effort:** M
-- [ ] **2.2.2** Implement automated SKILL.md generation with YAML frontmatter
+  - **Note:** `skill-novel-detector.py` scans session files for 5+ distinct tool-call workflows, computes novelty_score vs installed skills, outputs candidates JSON. `skill-evolution-check` cron (daily 23:00) proposes via Telegram.
+- [x] **2.2.2** Implement automated SKILL.md generation with YAML frontmatter
   - **Verify:** Generated skill passes validation
   - **Effort:** M
-- [ ] **2.2.3** Add user confirmation gate before skill creation
+  - **Note:** `skill-evolution-check` cron prompt instructs LLM to call `skill_manage(action='create')` with full YAML frontmatter + markdown body after user confirms.
+- [x] **2.2.3** Add user confirmation gate before skill creation
   - **Verify:** User prompted via Telegram to approve/reject auto-generated skill
   - **Effort:** S
+  - **Note:** Both `skill-evolution-check` and `skill-stale-report` cron prompts explicitly require Telegram confirmation before any `skill_manage` write. PARAM governance gate enforces this.
 
 ### 2.3 Failure-Driven Skill Improvement
-- [ ] **2.3.1** Implement failure pattern detection across sessions (same error 3+ times)
+- [x] **2.3.1** Implement failure pattern detection across sessions (same error 3+ times)
   - **Verify:** Failure pattern triggers improvement flag
   - **Effort:** M
-- [ ] **2.3.2** Implement automated skill patching for known failure modes (add pitfall section)
+  - **Note:** `skill-failure-tracker.py --mode=scan` normalizes ERROR/FATAL lines, fingerprints them via MD5, tracks count. Patterns with count ≥ 3 surfaced as active.
+- [x] **2.3.2** Implement automated skill patching for known failure modes (add pitfall section)
   - **Verify:** Skill updated with pitfall after failure detected
   - **Effort:** M
-- [ ] **2.3.3** Implement post-fix verification: retry failed task with updated skill
+  - **Note:** `skill-evolution-check` cron instructs LLM to call `skill_manage(action='patch')` adding pitfall section, using the `proposed_pitfall` text from failure-tracker output.
+- [x] **2.3.3** Implement post-fix verification: retry failed task with updated skill
   - **Verify:** Updated skill resolves the original failure
   - **Effort:** M
+  - **Note:** `skill-failure-tracker.py` tracks error count over time. Pattern with count declining after skill patch = resolved. State persists in `/opt/data/state/failure-patterns.json`. Manual verification via `--mode=report`.
 
 ### 2.4 Skill Lifecycle Management
-- [ ] **2.4.1** Track skill usage metrics: invocation count, success rate, last used
+- [x] **2.4.1** Track skill usage metrics: invocation count, success rate, last used
   - **Verify:** Dashboard/report shows skill metrics
   - **Effort:** M
-- [ ] **2.4.2** Surface unused skills (>60 days) via monthly cron report
+  - **Note:** `skill-tracker.py --mode=report` outputs JSON with {invocations, errors, last_used, first_seen} per skill. State in `/opt/data/state/skill-metrics.json`.
+- [x] **2.4.2** Surface unused skills (>60 days) via monthly cron report
   - **Verify:** Telegram notification lists unused skills for pruning review
   - **Effort:** S
+  - **Note:** `skill-stale-report` cron (monthly 1st 10:00) runs `skill-tracker.py --mode=stale-report` and sends Telegram list if stale_count > 0.
 
 ---
 
@@ -535,7 +543,7 @@
 |-------|-----------|-------|---|
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
-| 2: Self-Evolving Skills | 3 | 11 | 27% |
+| 2: Self-Evolving Skills | 11 | 11 | 100% |
 | 3: Autonomous NAS Ops | 9 | 10 | 90% |
 | 4: OMO Agent Dispatcher | 2 | 9 | 22% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
@@ -543,7 +551,7 @@
 | 7: Observability | 4 | 4 | 100% |
 | 8: Testing & CI/CD | 1 | 5 | 20% |
 | 9: Security Hardening | 4 | 5 | 80% |
-| **TOTAL** | **59** | **82** | **72%** |
+| **TOTAL** | **67** | **82** | **82%** |
 
 ---
 

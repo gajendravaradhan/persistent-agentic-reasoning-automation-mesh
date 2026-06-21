@@ -302,6 +302,33 @@ cron:
       if TokenEye down or records not increasing.
     schedule: 0 */6 * * *
     skills: []
+  - enabled: true
+    name: skill-evolution-check
+    prompt: 'Run the Phase 2 skill evolution pipeline. Step 1: run python3 /opt/data/scripts/skill-novel-detector.py
+      and parse the JSON output. Step 2: run python3 /opt/data/scripts/skill-failure-tracker.py
+      --mode=scan and parse the JSON output. Step 3: For each novel workflow candidate
+      with novelty_score >= 0.6, compose a concise Telegram message proposing skill
+      creation (include title, trigger, top 3 steps, novelty_score) and WAIT for
+      user confirmation before calling skill_manage. For each failure pattern with
+      count >= 3 and a skill_context field, compose a Telegram message proposing a
+      pitfall patch to the named skill (include the proposed_pitfall text) and WAIT
+      for user confirmation before calling skill_manage(action=''patch''). If user
+      confirms creation: call skill_manage(action=''create'', name=<title>, content=<SKILL.md
+      with YAML frontmatter>). If user confirms patch: call skill_manage(action=''patch'',
+      name=<skill>, old_string=''## Pitfalls'', new_string=<updated pitfalls section>)
+      or add a Pitfalls section if none exists. If no actionable findings, exit silently.'
+    schedule: 0 23 * * *
+    skills: []
+  - enabled: true
+    name: skill-stale-report
+    prompt: 'Run python3 /opt/data/scripts/skill-tracker.py --mode=stale-report and
+      parse the JSON output. If stale_count > 0, compose a Telegram message listing
+      the top 10 stale skills (name, days_since_use, invocations). Ask the user to
+      reply with skill names to delete. If the user replies with names, call skill_manage(action=''delete'',
+      name=<name>, absorbed_into='''') for each confirmed deletion. If stale_count
+      == 0, exit silently without sending any message.'
+    schedule: 0 10 1 * *
+    skills: []
   max_parallel_jobs: null
   tick_interval_seconds: 60
   wrap_response: true
