@@ -22,6 +22,10 @@ jobs:
           pip install pytest pytest-cov pytest-asyncio pyyaml
           pip install mutmut
 
+      - name: Validate router import
+        run: |
+          python -c "from src.router import classify_and_route; r = classify_and_route('find the bug'); assert r['intent'] in ('code_search','unknown','multi'), f'Unexpected intent: {r}'; print('Router import OK:', r['intent'])"
+
       - name: Run unit tests with coverage
         run: |
           pytest tests/ -v --tb=short --cov=. --cov-report=term --cov-fail-under=90 -k "not VaultStructure"
