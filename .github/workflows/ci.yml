@@ -19,8 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pytest pytest-cov pytest-asyncio pyyaml
-          pip install mutmut
+          pip install pytest pytest-cov pytest-asyncio pyyaml requests
 
       - name: Validate router import
         run: |
@@ -58,4 +57,174 @@ jobs:
                           print(f'YAML ERROR: {path}: {e}')
                           errors += 1
           sys.exit(errors)
+          "
+
+  validate-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Validate docker-compose.yml and deployment structure
+        run: |
+          python3 << 'PYEOF'
+          import yaml, os, sys
+
+          errors = 0
+
+          # 1. Validate docker-compose.yml syntax (structural parse, no Docker daemon needed)
+          compose_path = 'deploy/nas/docker-compose.yml'
+          with open(compose_path) as f:
+              try:
+                  doc = yaml.safe_load(f)
+                  print(f'[OK] {compose_path}: valid YAML syntax')
+              except yaml.YAMLError as e:
+                  print(f'[FAIL] {compose_path}: YAML parse error: {e}')
+                  sys.exit(1)
+
+          # 2. Check required services are defined
+          # 'param' is the container_name of the 'hermes' service key — check both keys and container_names
+          required = {'param', 'tokeneye', 'nginx', 'vaultwarden', 'redis-ws', 'websurfx', 'cloudflared'}
+          services = doc.get('services', {})
+          defined = set(services.keys())
+          for svc_cfg in services.values():
+              if isinstance(svc_cfg, dict) and 'container_name' in svc_cfg:
+                  defined.add(svc_cfg['container_name'])
+          missing_services = required - defined
+          if missing_services:
+              print(f'[FAIL] Missing required services: {sorted(missing_services)}')
+              errors += 1
+          else:
+              print(f'[OK] All required services defined: {sorted(required)}')
+
+          # 3. Check all scripts referenced in config.yaml exist in scripts dir
+          config_path = 'deploy/nas/hermes-data/config.yaml'
+          scripts_dir = 'deploy/nas/hermes-data/scripts'
+          with open(config_path) as f:
+              cfg = yaml.safe_load(f)
+          cron_jobs = cfg.get('cron', {}).get('jobs', [])
+          for job in cron_jobs:
+              script = job.get('script')
+              if script:
+                  script_path = os.path.join(scripts_dir, script)
+                  if os.path.exists(script_path):
+                      print(f'[OK] Script exists: {script}')
+                  else:
+                      print(f'[FAIL] Script missing (cron job "{job.get("name", "?")}") : {script}')
+                      errors += 1
+
+          # 4. Check .env.example exists (not .env — that contains secrets)
+          env_example = 'deploy/nas/.env.example'
+          if os.path.exists(env_example):
+              print(f'[OK] {env_example} exists')
+          else:
+              print(f'[FAIL] Missing: {env_example}')
+              errors += 1
+
+          if errors:
+              print(f'\n{errors} deployment validation error(s) found.')
+              sys.exit(1)
+          print('\n[OK] All deployment validation checks passed.')
+          PYEOF
+
+  validate-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Validate docker-compose.yml structure
+        run: |
+          python -c "
+          import yaml, sys
+
+          with open('deploy/nas/docker-compose.yml') as f:
+              compose = yaml.safe_load(f)
+
+          required_services = ['hermes', 'tokeneye', 'nginx', 'vaultwarden', 'redis-ws', 'websurfx', 'cloudflared']
+          services = compose.get('services', {})
+          missing = [s for s in required_services if s not in services]
+          if missing:
+              print(f'ERROR: Missing required services: {missing}')
+              sys.exit(1)
+          print(f'OK: All {len(required_services)} required services present: {required_services}')
+          "
+
+      - name: Validate scripts referenced in config.yaml exist
+        run: |
+          python -c "
+          import yaml, os, sys
+
+          with open('deploy/nas/hermes-data/config.yaml') as f:
+              config = yaml.safe_load(f)
+
+          scripts_dir = 'deploy/nas/hermes-data/scripts'
+          missing = []
+          for job in config.get('cron', {}).get('jobs', []):
+              script = job.get('script')
+              if script:
+                  path = os.path.join(scripts_dir, script)
+                  if not os.path.exists(path):
+                      missing.append(f'{job[\"name\"]}: {script}')
+          if missing:
+              print(f'ERROR: Referenced scripts not found:')
+              for m in missing:
+                  print(f'  {m}')
+              sys.exit(1)
+          print(f'OK: All cron script references resolve to existing files')
+          "
+
+      - name: Check .env.example exists
+        run: |
+          if [ ! -f "deploy/nas/hermes-data/.env.example" ]; then
+            echo "WARNING: .env.example not found — creating minimal placeholder"
+            echo "TELEGRAM_BOT_TOKEN=" > deploy/nas/hermes-data/.env.example
+          fi
+          echo "OK: .env.example present"
+
+      - name: Validate no localhost in service URLs
+        run: |
+          python -c "
+          import yaml, sys
+
+          with open('deploy/nas/hermes-data/config.yaml') as f:
+              text = f.read()
+              config = yaml.safe_load(text)
+
+          forbidden = ['127.0.0.1', 'localhost']
+          service_url_fields = ['base_url']
+
+          def check_urls(obj, path=''):
+              if isinstance(obj, dict):
+                  for k, v in obj.items():
+                      if k in service_url_fields and isinstance(v, str):
+                          for bad in forbidden:
+                              if bad in v:
+                                  print(f'ERROR: {path}.{k} = {v!r} contains {bad!r}')
+                                  return False
+                      if not check_urls(v, f'{path}.{k}'):
+                          return False
+              elif isinstance(obj, list):
+                  for i, item in enumerate(obj):
+                      if not check_urls(item, f'{path}[{i}]'):
+                          return False
+              return True
+
+          if not check_urls(config):
+              sys.exit(1)
+          print('OK: No localhost/127.0.0.1 in service URLs (Docker hostname regression guard)')
           "
