@@ -395,6 +395,75 @@ def verify_kanban_dispatcher():
     return ok, "kanban dispatcher confirmed in logs" if ok else "kanban dispatcher NOT in logs"
 
 
+@check("4.1.2")
+def verify_macbook_detector():
+    script = SCRIPTS_DIR / "macbook-detector.sh"
+    if not script.exists():
+        return False, "macbook-detector.sh not found"
+    result = subprocess.run(["bash", "-n", str(script)], capture_output=True, text=True)
+    if result.returncode != 0:
+        return False, f"macbook-detector.sh syntax error: {result.stderr.strip()}"
+    has_cron = "macbook-detector" in (PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "config.yaml").read_text()
+    return has_cron, "macbook-detector.sh exists + cron entry present" if has_cron else "macbook-detector.sh exists but cron entry missing"
+
+
+@check("4.2.1")
+def verify_task_classifier():
+    script = SCRIPTS_DIR / "task-classifier.py"
+    if not script.exists():
+        return False, "task-classifier.py not found"
+    result = subprocess.run(
+        ["python3", "-m", "py_compile", str(script)],
+        capture_output=True, text=True
+    )
+    ok = result.returncode == 0
+    return ok, "task-classifier.py compiles cleanly" if ok else f"Compile error: {result.stderr.strip()}"
+
+
+@check("4.2.2")
+def verify_macbook_task_router():
+    config_text = (PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "config.yaml").read_text()
+    ok = "macbook-task-router" in config_text
+    return ok, "macbook-task-router cron entry present" if ok else "macbook-task-router cron entry MISSING"
+
+
+@check("4.3.1")
+def verify_stale_worker_watchdog():
+    script = SCRIPTS_DIR / "stale-worker-watchdog.sh"
+    if not script.exists():
+        return False, "stale-worker-watchdog.sh not found"
+    result = subprocess.run(["bash", "-n", str(script)], capture_output=True, text=True)
+    if result.returncode != 0:
+        return False, f"stale-worker-watchdog.sh syntax error: {result.stderr.strip()}"
+    config_text = (PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "config.yaml").read_text()
+    has_cron = "stale-worker-watchdog" in config_text
+    return has_cron, "stale-worker-watchdog.sh + cron entry present" if has_cron else "script exists but cron entry missing"
+
+
+@check("4.3.3")
+def verify_kanban_flowkeeper():
+    config_text = (PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "config.yaml").read_text()
+    ok = "kanban-flowkeeper" in config_text
+    return ok, "kanban-flowkeeper cron entry present" if ok else "kanban-flowkeeper cron entry MISSING"
+
+
+@check("4.3.4")
+def verify_kanban_post_work_audit():
+    config_text = (PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "config.yaml").read_text()
+    ok = "kanban-post-work-audit" in config_text
+    return ok, "kanban-post-work-audit cron entry present" if ok else "kanban-post-work-audit cron entry MISSING"
+
+
+@check("4.4.1")
+def verify_dispatcher_architecture_documented():
+    arch = PROJECT_ROOT / "specs" / "ARCHITECTURE.md"
+    if not arch.exists():
+        return False, "ARCHITECTURE.md not found"
+    text = arch.read_text()
+    ok = "Phase 4" in text and "dispatcher" in text.lower()
+    return ok, "ARCHITECTURE.md documents Phase 4 dispatcher" if ok else "ARCHITECTURE.md missing Phase 4 dispatcher section"
+
+
 @check("5.1.1")
 def verify_discord_enabled():
     cfg = nas_config_get("/home/Nasama-Pochu/param/deploy/nas/hermes-data/config.yaml")

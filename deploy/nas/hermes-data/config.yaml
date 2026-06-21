@@ -340,6 +340,24 @@ cron:
     schedule: '*/5 * * * *'
     script: autoheal.sh
   - enabled: true
+    name: macbook-detector
+    no_agent: true
+    schedule: '*/5 * * * *'
+    script: macbook-detector.sh
+  - enabled: true
+    name: macbook-task-router
+    prompt: 'Run python3 /opt/data/scripts/task-classifier.py and parse JSON output. If macbook_required
+      is non-empty AND macbook_online is true: send a Telegram message listing the pending MacBook-required
+      tasks (show title and status for each). Keep it concise — one line per task. If macbook_required
+      is empty OR macbook_online is false: exit silently without sending any message.'
+    schedule: '*/15 * * * *'
+    skills: []
+  - enabled: true
+    name: stale-worker-watchdog
+    no_agent: true
+    schedule: '*/15 * * * *'
+    script: stale-worker-watchdog.sh
+  - enabled: true
     name: secret-rotation-reminder
     prompt: 'Annual secret rotation check: TELEGRAM_BOT_TOKEN, DISCORD_BOT_TOKEN, WEBHOOK_SECRET.
       Check if any key is >365 days old. Alert user if rotation needed. No report if all current.'
