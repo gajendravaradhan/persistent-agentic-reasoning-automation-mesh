@@ -298,7 +298,7 @@ cron:
     skills: []
   - enabled: true
     name: cost-monitor
-    prompt: Check TokenEye at localhost:8787/__health. Report record count. Alert
+    prompt: Check TokenEye at http://tokeneye:8787/__health. Report record count. Alert
       if TokenEye down or records not increasing.
     schedule: 0 */6 * * *
     skills: []
@@ -493,7 +493,7 @@ max_concurrent_sessions: null
 memory:
   flush_min_turns: 6
   honcho:
-    base_url: http://localhost:8000
+    base_url: http://api:8000
   memory_char_limit: 2200
   memory_enabled: true
   nudge_interval: 10
@@ -503,7 +503,7 @@ memory:
   user_profile_enabled: true
   write_approval: false
 model:
-  base_url: http://127.0.0.1:8787/zen/go/v1
+  base_url: http://tokeneye:8787/zen/go/v1
   default: kimi-k2.6
   default_headers:
     Accept: application/json
