@@ -22,7 +22,7 @@ class TestConfigYAMLValidation:
         path = os.path.join(PROJECT_ROOT, "deploy/nas/hermes-data/config.yaml")
         with open(path) as f:
             cfg = yaml.safe_load(f)
-        assert cfg["model"]["base_url"] == "http://127.0.0.1:8787/zen/go/v1"
+        assert cfg["model"]["base_url"] == "http://tokeneye:8787/zen/go/v1"
 
     def test_nas_config_cron_has_required_jobs(self):
         path = os.path.join(PROJECT_ROOT, "deploy/nas/hermes-data/config.yaml")
