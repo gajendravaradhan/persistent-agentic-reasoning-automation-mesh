@@ -563,4 +563,60 @@ The current implementation architecture (Python MCP bridge + AGENTS.md-based ide
 
 ---
 
+## Phase 4: OMO Agent Dispatcher
+
+The dispatcher bridges the NAS's always-on Hermes gateway to the MacBook's on-demand OMO execution capability.
+
+### Architecture
+
+```
+NAS (always-on)                          MacBook (worker node, on-demand)
+─────────────────────────────────        ────────────────────────────────
+Hermes kanban board                      OpenCode / OMO session
+       │                                        │
+       ▼                                        │
+macbook-detector.sh (every 5 min)               │
+  SSH probe → gajendra.local                    │
+  Writes macbook-state.json                     │
+       │                                        │
+       ▼                                        │
+task-classifier.py (every 15 min)               │
+  Reads kanban open tasks                       │
+  Classifies: NAS_ONLY vs MACBOOK_REQUIRED      │
+  Checks macbook-state.json                     │
+       │                                        │
+       ▼ (if MACBOOK_REQUIRED + online)         │
+macbook-task-router cron                        │
+  LLM agent sends Telegram alert ──────────────►│
+  "X tasks ready, MacBook online"               │
+  User starts OMO session on MacBook            │
+                                         Picks up kanban tasks
+                                         Executes with OMO agents
+```
+
+### Task Classification
+
+Tasks are classified by keyword heuristic on title + description:
+
+| Signal keywords | Classification |
+|---|---|
+| code, implement, build, refactor, test, debug, write, fix, create, develop, PR, commit | `MACBOOK_REQUIRED` |
+| All others | `NAS_ONLY` |
+
+NAS_ONLY tasks are handled autonomously by Hermes agents via the 60s kanban dispatcher tick (already running). MACBOOK_REQUIRED tasks wait until MacBook presence is confirmed, then notify the user via Telegram.
+
+### Worker Lifecycle
+
+- **macbook-detector.sh** (every 5 min, no_agent): SSH probe, silent unless state changes
+- **task-classifier.py** (every 15 min, via LLM cron): classify + route notification
+- **stale-worker-watchdog.sh** (every 15 min, no_agent): reaps tasks stuck >15 min in running state
+- **kanban-flowkeeper** (every 30 min, LLM): board hygiene — orphan clearing, unblock propagation
+- **kanban-post-work-audit** (every 30 min, LLM): completion verification
+
+### MacBook Offline Fallback
+
+When MacBook is offline, MACBOOK_REQUIRED tasks remain in kanban `ready` state. The macbook-task-router skips notification. When MacBook comes back online, the next detector cycle updates macbook-state.json and the subsequent router cycle sends a Telegram summary of all pending tasks.
+
+---
+
 *PARAM Architecture — Version 1.0 — June 2026*
