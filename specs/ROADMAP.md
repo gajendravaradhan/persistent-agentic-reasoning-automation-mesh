@@ -317,9 +317,10 @@
    - **Verify:** Autonomous check-in surfaces actionable items
    - **Effort:** M
    - **Note:** Enhanced wake-and-check cron (every 30min) with diff-based tracking via notify-state.json. Reports only NEW pending items, escalates items persisting 3+ cycles (90min). Uses shared state file with notification-controller. Cron prompt updated on NAS.
-- [ ] **3.1.3** Implement autonomous task execution for low-risk routine tasks
+- [x] **3.1.3** Implement autonomous task execution for low-risk routine tasks
   - **Verify:** Health checks, log rotation, backup verification run without user
   - **Effort:** M
+  - **Note:** `autonomous-maintenance.sh` cron (every 6h, no_agent=true): log rotation at 50MB, state file pruning after 30 days, disk space alert at 85%, audit log trimming at 10K lines, skill/notify state initialization. Produces output only on action taken.
 
 ### 3.2 Proactive Notification System
 - [x] **3.2.1** Define notification tiers: INFO, WARNING, CRITICAL
@@ -515,6 +516,7 @@
 - [ ] **9.2.2** Implement Cloudflare Access for dashboard (Zero Trust)
   - **Verify:** Dashboard requires authentication beyond tunnel
   - **Effort:** M
+  - **Note (MANUAL REQUIRED):** Cloudflare dashboard operation — cannot be automated. Steps: (1) Go to dash.cloudflare.com → Zero Trust → Access → Applications → Add application → Self-hosted. (2) Set Application Domain to `param.aiforges.app`. (3) Add policy: Include → Emails → your email address. (4) Save. Hermes dashboard at `param.aiforges.app` will then require CF Access login before showing content. No code changes needed.
 
 ---
 
@@ -544,14 +546,14 @@
 | 0: Foundation + NAS | 20 | 20 | 100% |
 | 1: Memory Engine | 10 | 13 | 77% |
 | 2: Self-Evolving Skills | 11 | 11 | 100% |
-| 3: Autonomous NAS Ops | 9 | 10 | 90% |
+| 3: Autonomous NAS Ops | 10 | 10 | 100% |
 | 4: OMO Agent Dispatcher | 2 | 9 | 22% |
 | 5: Multi-Channel Gateway | 4 | 4 | 100% |
 | 6: Advanced Infrastructure | 3 | 8 | 38% |
 | 7: Observability | 4 | 4 | 100% |
 | 8: Testing & CI/CD | 1 | 5 | 20% |
 | 9: Security Hardening | 4 | 5 | 80% |
-| **TOTAL** | **67** | **82** | **82%** |
+| **TOTAL** | **68** | **82** | **83%** |
 
 ---
 
