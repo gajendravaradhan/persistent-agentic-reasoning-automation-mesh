@@ -458,6 +458,58 @@ def verify_pytest():
         return False, f"pytest error: {e}"
 
 
+@check("8.1.2")
+def verify_mcp_integration_tests():
+    test_file = PROJECT_ROOT / "tests" / "test_mcp_integration.py"
+    if not test_file.exists():
+        return False, "tests/test_mcp_integration.py not found"
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_mcp_integration.py", "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30,
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"MCP integration tests: {summary}" if ok else f"MCP integration FAILED: {summary}"
+
+
+@check("8.1.3")
+def verify_memory_provider_tests():
+    test_file = PROJECT_ROOT / "tests" / "test_memory_provider.py"
+    if not test_file.exists():
+        return False, "tests/test_memory_provider.py not found"
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_memory_provider.py", "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30,
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"Memory provider tests: {summary}" if ok else f"Memory tests FAILED: {summary}"
+
+
+@check("8.2.1")
+def verify_ci_validate_deployment_job():
+    ci = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
+    if not ci.exists():
+        return False, "ci.yml not found"
+    text = ci.read_text()
+    ok = "validate-deployment" in text
+    return ok, "validate-deployment job present in ci.yml" if ok else "validate-deployment job MISSING from ci.yml"
+
+
+@check("8.2.2")
+def verify_ci_compose_validation():
+    ci = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
+    if not ci.exists():
+        return False, "ci.yml not found"
+    text = ci.read_text()
+    has_compose = "docker-compose" in text.lower() or "compose" in text.lower()
+    has_services = "services" in text.lower() or "param" in text
+    ok = has_compose and has_services
+    return ok, "CI validates docker-compose structure" if ok else "CI missing compose/service validation"
+
+
 @check("9.1.1")
 def verify_secrets_audit():
     audit = Path(PROJECT_ROOT / "specs" / "ROADMAP.md").read_text()
