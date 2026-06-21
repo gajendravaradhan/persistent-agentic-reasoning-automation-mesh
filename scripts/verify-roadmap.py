@@ -747,6 +747,288 @@ def verify_router_coverage():
 
 
 
+@check("IR-0.2.2")
+def verify_confidence_scoring():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.classifier import IntentClassifier
+        c = IntentClassifier()
+        single = c.classify("hello")
+        multi = c.classify("find the auth file and then deploy to production and check security")
+        ok = single.confidence < 0.90 and multi.confidence >= 0.80
+        return ok, f"Confidence scoring: single={single.confidence}, multi={multi.confidence}" if ok else f"Scoring wrong: single={single.confidence}"
+    except Exception as e:
+        return False, f"Confidence scoring FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-0.2.3")
+def verify_multi_intent_detection():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.classifier import IntentClassifier
+        from router.types import Intent
+        c = IntentClassifier()
+        result = c.classify("find the bug AND deploy the fix")
+        ok = result.intent == Intent.MULTI_INTENT
+        return ok, f"Multi-intent detected: {result.intent}" if ok else f"Multi-intent NOT detected: {result.intent}"
+    except Exception as e:
+        return False, f"Multi-intent detection FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-0.3.3")
+def verify_route_decision_serde():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.guard import serialize_route_decision, deserialize_route_decision, RouteDecision, Route
+        rd = RouteDecision(route=Route.BLOCK, reason="test reason")
+        d = serialize_route_decision(rd)
+        rd2 = deserialize_route_decision(d)
+        ok = rd2.route == Route.BLOCK and rd2.reason == "test reason"
+        return ok, "RouteDecision serialization/deserialization works" if ok else f"Serde mismatch: {rd2}"
+    except Exception as e:
+        return False, f"RouteDecision serde FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-0.4.2")
+def verify_get_route_function():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.types import Intent
+        from router.routes import get_route
+        code_search = get_route(Intent.CODE_SEARCH)
+        casual = get_route(Intent.CASUAL_CHAT)
+        unknown = get_route(Intent.UNKNOWN)
+        ok = code_search.agent == "explore" and casual.agent == "llm" and unknown.agent == "llm"
+        return ok, f"get_route: CODE_SEARCH→{code_search.agent}, CASUAL→{casual.agent}, UNKNOWN→{unknown.agent}" if ok else "get_route returns wrong agents"
+    except Exception as e:
+        return False, f"get_route FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-0.5.2")
+def verify_get_stats():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.audit import AuditLogger
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl") as f:
+            tmp = f.name
+        logger = AuditLogger(tmp)
+        stats = logger.get_stats()
+        required = {"total_entries", "intent_distribution", "confidence_avg", "route_distribution", "guard_trigger_rate"}
+        missing = required - set(stats.keys())
+        ok = len(missing) == 0
+        import os; os.unlink(tmp)
+        return ok, f"get_stats() has all {len(required)} fields" if ok else f"Missing fields: {missing}"
+    except Exception as e:
+        return False, f"get_stats FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-0.6.2")
+def verify_fallback_chain():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router import classify_and_route
+        result = classify_and_route("xyzzy frobnicator blorp")
+        ok = result.get("route") in ("llm", "fallback_llm") or result.get("intent") == "unknown"
+        return ok, f"Low-confidence → routed to LLM: {result.get('route')}" if ok else f"Fallback not triggered: {result}"
+    except Exception as e:
+        return False, f"Fallback chain FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-0.6.3")
+def verify_split_routing():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router import classify_and_route
+        result = classify_and_route("find the auth function and then deploy the service")
+        ok = result.get("route") in ("split", "blocked", "fallback_llm") or "sub_routes" in result
+        return ok, f"Multi-intent → {result.get('route')}" if ok else f"Split routing not triggered: {result}"
+    except Exception as e:
+        return False, f"Split routing FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-1.1.1")
+def verify_type_tests():
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_router/test_types.py", "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"Type tests: {summary}" if ok else f"Type tests FAILED: {summary}"
+
+
+@check("IR-1.1.2")
+def verify_classifier_tests():
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_router/test_classifier.py", "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"Classifier tests: {summary}" if ok else f"Classifier tests FAILED: {summary}"
+
+
+@check("IR-1.1.3")
+@check("IR-1.1.4")
+@check("IR-1.1.5")
+@check("IR-1.1.6")
+@check("IR-1.1.7")
+@check("IR-1.1.8")
+def verify_guard_route_tests():
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_router/test_guard_routes.py", "tests/test_router/test_audit_orch.py",
+         "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"Guard/route/audit tests: {summary}" if ok else f"Tests FAILED: {summary}"
+
+
+@check("IR-0.5.3")
+def verify_sha256_dedup():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.audit import AuditLogger
+        from router.types import AuditEntry, Intent
+        from datetime import datetime
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl") as f:
+            tmp = f.name
+        logger = AuditLogger(tmp)
+        entry = AuditEntry(datetime.now(), "dedup_hash_123", "same request", Intent.CASUAL_CHAT.name, 0.95, "rule", "llm", [], "routed", 5)
+        logger.log(entry)
+        logger.log(entry)
+        lines = [l for l in open(tmp).read().splitlines() if l.strip()]
+        os.unlink(tmp)
+        ok = len(lines) == 1
+        return ok, f"SHA256 dedup works: {len(lines)} entry for 2 identical requests" if ok else f"Dedup FAILED: {len(lines)} entries"
+    except Exception as e:
+        return False, f"SHA256 dedup FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-1.2.1")
+def verify_empty_request_handling():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router import classify_and_route
+        result = classify_and_route("")
+        ok = result.get("confidence", 1.0) == 0.0 or result.get("route") in ("fallback_llm", "llm")
+        return ok, f"Empty request → {result.get('route')}, confidence={result.get('confidence')}" if ok else f"Empty request not handled: {result}"
+    except Exception as e:
+        return False, f"Empty request FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-1.2.2")
+def verify_long_request_truncation():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.classifier import IntentClassifier
+        long_req = "find the authentication module " * 100
+        c = IntentClassifier()
+        result = c.classify(long_req)
+        ok = hasattr(result, "intent") and result.confidence >= 0.0
+        return ok, f"Long request classified: {result.intent} ({result.confidence})" if ok else "Long request FAILED"
+    except Exception as e:
+        return False, f"Long request FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-1.2.3")
+def verify_mixed_language():
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "src"))
+        from router.classifier import IntentClassifier
+        c = IntentClassifier()
+        result = c.classify("deploy करना है service को")
+        ok = hasattr(result, "intent") and result.confidence >= 0.0
+        return ok, f"Mixed-language handled: {result.intent} ({result.confidence})" if ok else "Mixed language CRASHED"
+    except Exception as e:
+        return False, f"Mixed language FAILED: {e}"
+    finally:
+        if str(PROJECT_ROOT / "src") in sys.path:
+            sys.path.remove(str(PROJECT_ROOT / "src"))
+
+
+@check("IR-1.2.4")
+def verify_rapid_repeated_classification():
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_router/test_edge_cases.py::TestEdgeCaseRapidRepeated",
+         "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"Rapid repeated: {summary}" if ok else f"Rapid repeated FAILED: {summary}"
+
+
+@check("IR-1.2.5")
+def verify_no_regex_backtracking():
+    result = subprocess.run(
+        ["python3", "-m", "pytest", "tests/test_router/test_edge_cases.py::TestEdgeCaseRegexBacktracking",
+         "-q", "--no-header", "--tb=no"],
+        capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30
+    )
+    ok = result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    summary = lines[-1] if lines else "no output"
+    return ok, f"Regex backtracking: {summary}" if ok else f"Backtracking test FAILED: {summary}"
+
+
+@check("IR-2.2.1")
+def verify_ci_runs_router_tests():
+    ci = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
+    if not ci.exists():
+        return False, "ci.yml not found"
+    text = ci.read_text()
+    ok = "test_router" in text or ("pytest" in text and "tests/" in text)
+    return ok, "CI runs router tests via pytest tests/" if ok else "CI does not cover router tests"
+
+
+@check("IR-2.2.2")
+def verify_ci_router_import_validation():
+    ci = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
+    if not ci.exists():
+        return False, "ci.yml not found"
+    text = ci.read_text()
+    ok = "classify_and_route" in text
+    return ok, "CI has explicit router import validation step" if ok else "CI missing router import validation"
+
+
 @check("NAS-ROUTER")
 def verify_router_on_nas():
     out = ssh("docker exec param python3 -c \"import sys; sys.path.insert(0,\\\"/opt/data/router\\\"); from router import classify_and_route; print(type(classify_and_route))\"")

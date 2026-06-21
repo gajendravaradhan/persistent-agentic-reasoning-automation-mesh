@@ -1,8 +1,10 @@
 """Intent routing orchestrator — main entry point for the PARAM intent router.
 
 Implements the full classify → guard → safety → route → audit pipeline.
+Optionally emits Langfuse traces when LANGFUSE_PUBLIC_KEY env var is set.
 """
 import hashlib
+import os
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -12,6 +14,33 @@ from .classifier import IntentClassifier
 from .guard import ConfidenceGuard, SafetyGate
 from .routes import get_route
 from .types import AuditEntry, ClassifiedIntent, Route, RouteDecision
+
+
+def _langfuse_trace(request: str, result: Dict[str, Any], latency_ms: int) -> None:
+    if not os.environ.get("LANGFUSE_PUBLIC_KEY"):
+        return
+    try:
+        from langfuse import Langfuse
+        lf = Langfuse()
+        trace = lf.trace(
+            name="intent-router",
+            input={"request": request[:500]},
+            output=result,
+            metadata={"latency_ms": latency_ms, "source": "param-router"},
+        )
+        trace.span(
+            name="classify-and-route",
+            input={"request": request[:200]},
+            output={
+                "intent": result.get("intent"),
+                "confidence": result.get("confidence"),
+                "route": result.get("route"),
+            },
+            metadata={"method": result.get("method"), "requires_approval": result.get("requires_approval")},
+        )
+        lf.flush()
+    except Exception:
+        pass
 
 
 def _compute_hash(request: str) -> str:
@@ -62,6 +91,7 @@ def _log_and_return(
         latency_ms=latency_ms,
     )
     auditor.log(entry)
+    _langfuse_trace(request, response_dict, latency_ms)
     return response_dict
 
 
