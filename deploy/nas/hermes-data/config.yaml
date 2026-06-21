@@ -320,6 +320,11 @@ cron:
     schedule: 0 23 * * *
     skills: []
   - enabled: true
+    name: autonomous-maintenance
+    no_agent: true
+    schedule: 0 */6 * * *
+    script: autonomous-maintenance.sh
+  - enabled: true
     name: skill-stale-report
     prompt: 'Run python3 /opt/data/scripts/skill-tracker.py --mode=stale-report and
       parse the JSON output. If stale_count > 0, compose a Telegram message listing
