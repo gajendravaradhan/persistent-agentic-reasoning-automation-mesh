@@ -786,6 +786,153 @@ def verify_bitwarden_documented():
     vault = nas_container_healthy("param-vaultwarden")
     return vault, "Vaultwarden running (encrypted storage)" if vault else "Vaultwarden NOT running"
 
+
+SCRIPTS_DIR = PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "scripts"
+
+
+@check("2.2.1")
+def verify_novel_detector_exists():
+    p = SCRIPTS_DIR / "skill-novel-detector.py"
+    if not p.exists():
+        return False, "skill-novel-detector.py not found"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(p)],
+            capture_output=True, text=True, timeout=15
+        )
+        data = json.loads(result.stdout)
+        if "candidates" not in data or "sessions_scanned" not in data:
+            return False, f"Invalid output schema: {list(data.keys())}"
+        return True, f"Novel detector OK — {data['sessions_scanned']} sessions scanned"
+    except Exception as e:
+        return False, f"Novel detector error: {e}"
+
+
+@check("2.2.2")
+def verify_skill_creation_writable():
+    skills_dir = Path.home() / ".hermes" / "skills"
+    if not skills_dir.exists():
+        return False, f"Skills directory not found: {skills_dir}"
+    return os.access(str(skills_dir), os.W_OK), f"Skills dir {'writable' if os.access(str(skills_dir), os.W_OK) else 'NOT writable'}: {skills_dir}"
+
+
+@check("2.2.3")
+def verify_telegram_gate_configured():
+    config_path = PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / "config.yaml"
+    if not config_path.exists():
+        return False, "config.yaml not found"
+    config_text = config_path.read_text()
+    has_telegram = "telegram" in config_text.lower()
+    env_path = PROJECT_ROOT / "deploy" / "nas" / "hermes-data" / ".env"
+    has_whitelist = False
+    if env_path.exists():
+        has_whitelist = "TELEGRAM_ALLOWED_USERS" in env_path.read_text()
+    else:
+        has_whitelist = "skill-evolution-check" in config_text and "WAIT for" in config_text
+    ok = has_telegram and has_whitelist
+    return ok, "Telegram configured + user gate enforced in cron prompt" if ok else "Telegram or confirmation gate missing"
+
+
+@check("2.3.1")
+def verify_failure_tracker_exists():
+    p = SCRIPTS_DIR / "skill-failure-tracker.py"
+    if not p.exists():
+        return False, "skill-failure-tracker.py not found"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(p), "--mode=scan"],
+            capture_output=True, text=True, timeout=15
+        )
+        data = json.loads(result.stdout)
+        if "active_patterns" not in data or "patterns" not in data:
+            return False, f"Invalid output schema: {list(data.keys())}"
+        return True, f"Failure tracker OK — {data['active_patterns']} active patterns from {data['scanned_lines']} lines"
+    except Exception as e:
+        return False, f"Failure tracker error: {e}"
+
+
+@check("2.3.2")
+def verify_pitfall_proposals_generated():
+    p = SCRIPTS_DIR / "skill-failure-tracker.py"
+    if not p.exists():
+        return False, "skill-failure-tracker.py not found"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(p), "--mode=report"],
+            capture_output=True, text=True, timeout=10
+        )
+        data = json.loads(result.stdout)
+        for pattern in data.get("patterns", []):
+            if "proposed_pitfall" not in pattern:
+                return False, "Pattern missing proposed_pitfall field"
+        return True, f"{data['active_patterns']} active patterns, pitfall proposals present"
+    except Exception as e:
+        return False, f"Report mode error: {e}"
+
+
+@check("2.3.3")
+def verify_failure_tracking_operational():
+    state_file = Path.home() / ".hermes" / "state" / "failure-patterns.json"
+    p = SCRIPTS_DIR / "skill-failure-tracker.py"
+    if not p.exists():
+        return False, "skill-failure-tracker.py not found"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(p), "--mode=scan"],
+            capture_output=True, text=True, timeout=15
+        )
+        data = json.loads(result.stdout)
+        patterns = data.get("patterns", [])
+        for pattern in patterns:
+            if not all(k in pattern for k in ["fingerprint", "count", "proposed_pitfall"]):
+                return False, "Pattern schema missing required fields"
+        return True, f"Failure tracking operational — {data['total_patterns']} patterns tracked"
+    except Exception as e:
+        return False, f"Scan mode error: {e}"
+
+
+@check("2.4.1")
+def verify_skill_tracker_exists():
+    p = SCRIPTS_DIR / "skill-tracker.py"
+    if not p.exists():
+        return False, "skill-tracker.py not found"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(p), "--mode=report"],
+            capture_output=True, text=True, timeout=10
+        )
+        data = json.loads(result.stdout)
+        if "total_skills" not in data or "skills" not in data:
+            return False, f"Invalid output schema: {list(data.keys())}"
+        return True, f"Skill tracker OK — {data['total_skills']} skills discovered"
+    except Exception as e:
+        return False, f"Skill tracker error: {e}"
+
+
+@check("2.4.2")
+def verify_stale_report_works():
+    p = SCRIPTS_DIR / "skill-tracker.py"
+    if not p.exists():
+        return False, "skill-tracker.py not found"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(p), "--mode=stale-report"],
+            capture_output=True, text=True, timeout=10
+        )
+        data = json.loads(result.stdout)
+        if "stale_count" not in data or "stale_skills" not in data:
+            return False, f"Invalid stale-report schema: {list(data.keys())}"
+        return True, f"Stale report works — {data['stale_count']} stale skills"
+    except Exception as e:
+        return False, f"Stale report error: {e}"
+
+
 def run_verification(phases: dict, phase_filter: Optional[int] = None):
     """Run verification for all tasks marked [x] across all phases."""
     total_claimed = 0
