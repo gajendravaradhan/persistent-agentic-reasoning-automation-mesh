@@ -1,0 +1,7 @@
+name: param-intent-router
+kind: standalone
+version: 1.0.0
+description: PARAM Intent Router — classifies incoming messages and gates dangerous intents (INFRA/DEPLOY/SEC) before LLM dispatch
+author: PARAM
+hooks:
+  - pre_gateway_dispatch
