@@ -1,0 +1,5 @@
+name: skill-tracker
+description: Records skill invocations and errors on agent:start and agent:end events, feeding the self-evolving skills pipeline
+events:
+  - agent:start
+  - agent:end

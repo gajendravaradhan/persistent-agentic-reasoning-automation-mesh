@@ -1,0 +1,4 @@
+name: intent-router
+description: Classifies incoming messages via the PARAM Intent Router, logs audit entries, and posts classification info to Langfuse
+events:
+  - agent:start
