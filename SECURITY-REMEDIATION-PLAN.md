@@ -14,9 +14,9 @@ The repository `persistent-agentic-reasoning-automation-mesh` is PUBLIC on GitHu
 
 | Credential | Type | Status |
 |---|---|---|
-| `HERMES_LANGFUSE_PUBLIC_KEY=REDACTED-LANGFUSE-PUBLIC` | Langfuse observability public key | LEAKED |
-| `HERMES_LANGFUSE_SECRET_KEY=REDACTED-LANGFUSE-SECRET` | Langfuse observability SECRET key | **LEAKED — read access to all production traces** |
-| `BW_CLIENTID=REDACTED-BW-CLIENTID` | Vaultwarden service account ID | LEAKED |
+| `HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-<REDACTED>` | Langfuse observability public key | LEAKED |
+| `HERMES_LANGFUSE_SECRET_KEY=sk-lf-<REDACTED>` | Langfuse observability SECRET key | **LEAKED — read access to all production traces** |
+| `BW_CLIENTID=user.<REDACTED>` | Vaultwarden service account ID | LEAKED |
 | `BW_CLIENTSECRET=REDACTED-BW-SECRET` | Vaultwarden service account SECRET | **LEAKED — full Bitwarden vault access** |
 
 Other credentials (TELEGRAM_BOT_TOKEN, ANTHROPIC_API_KEY, etc.) live in `deploy/nas/hermes-data/.env` which IS properly gitignored and NOT in git history. Verified via `git ls-files deploy/nas/hermes-data/.env` → empty.
@@ -30,12 +30,12 @@ Other credentials (TELEGRAM_BOT_TOKEN, ANTHROPIC_API_KEY, etc.) live in `deploy/
 **Action: Rotate the leaked credentials.** Only you can do this — I cannot.
 
 1. **Langfuse** — Cloud Langfuse dashboard (`cloud.langfuse.com`)
-   - Project Settings → API Keys → Revoke `REDACTED-LANGFUSE-SECRET`
+   - Project Settings → API Keys → Revoke `sk-lf-<REDACTED>`
    - Create new key pair → update new values in your local `deploy/nas/hermes-data/.env` (under `HERMES_LANGFUSE_PUBLIC_KEY` and `HERMES_LANGFUSE_SECRET_KEY` keys — add them if missing)
    - Traces are now safe — old key cannot be used to read production agent data
 
 2. **Vaultwarden Service Account** — Vaultwarden admin UI on NAS (`https://vault.param.aiforges.app`)
-   - Settings → API Key → revoke `REDACTED-BW-CLIENTID`
+   - Settings → API Key → revoke `user.<REDACTED>`
    - Generate new service account → update `BW_CLIENTID` and `BW_CLIENTSECRET` in `deploy/nas/hermes-data/.env`
    - Old creds can no longer read your vault
 
