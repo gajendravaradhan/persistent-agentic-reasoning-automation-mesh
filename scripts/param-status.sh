@@ -35,11 +35,10 @@ else
     echo -e "${RED}SYNTAX ERROR${NC}"
 fi
 
-# 3. TokenEye
+# 3. TokenEye (runs on NAS in param-tokeneye container, not on this Mac)
 echo -n "  TokenEye:     "
-if curl -s http://127.0.0.1:8787/__health > /dev/null 2>&1; then
-    RECORDS=$(curl -s http://127.0.0.1:8787/__health | python3 -c "import sys,json; print(json.load(sys.stdin)['recordCount'])" 2>/dev/null)
-    echo -e "${GREEN}RUNNING ($RECORDS records)${NC}"
+if curl -s https://tokeneye.aiforges.app/__health > /dev/null 2>&1; then
+    echo -e "${GREEN}UP (NAS-hosted, dashboard reachable)${NC}"
 else
     echo -e "${RED}DOWN${NC}"
 fi

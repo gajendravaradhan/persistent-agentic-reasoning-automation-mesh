@@ -27,15 +27,15 @@ services:
       - HERMES_DASHBOARD=1
       - HERMES_DASHBOARD_HOST=0.0.0.0
       - HERMES_DASHBOARD_INSECURE=1
-      # -- Langfuse Observability --
-      - HERMES_LANGFUSE_PUBLIC_KEY=REDACTED-LANGFUSE-PUBLIC
-      - HERMES_LANGFUSE_SECRET_KEY=REDACTED-LANGFUSE-SECRET
-      - HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com
-      - HERMES_LANGFUSE_ENV=production
-      - HERMES_LANGFUSE_SAMPLE_RATE=1.0
-      # -- Vaultwarden Secrets --
-      - BW_CLIENTID=REDACTED-BW-CLIENTID
-      - BW_CLIENTSECRET=REDACTED-BW-SECRET
+      # -- Langfuse Observability (secrets via .env — never inline) --
+      - HERMES_LANGFUSE_PUBLIC_KEY=${HERMES_LANGFUSE_PUBLIC_KEY}
+      - HERMES_LANGFUSE_SECRET_KEY=${HERMES_LANGFUSE_SECRET_KEY}
+      - HERMES_LANGFUSE_BASE_URL=${HERMES_LANGFUSE_BASE_URL:-https://cloud.langfuse.com}
+      - HERMES_LANGFUSE_ENV=${HERMES_LANGFUSE_ENV:-production}
+      - HERMES_LANGFUSE_SAMPLE_RATE=${HERMES_LANGFUSE_SAMPLE_RATE:-1.0}
+      # -- Vaultwarden Secrets (via .env) --
+      - BW_CLIENTID=${BW_CLIENTID}
+      - BW_CLIENTSECRET=${BW_CLIENTSECRET}
       # PARAM router available at /opt/data/router/
       # Import: sys.path.insert(0, "/opt/data/router"); from router import classify_and_route
     command: ["gateway", "run"]

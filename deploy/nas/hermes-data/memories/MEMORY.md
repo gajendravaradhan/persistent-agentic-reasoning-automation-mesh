@@ -27,7 +27,7 @@
 
 ## Key Projects
 - persistent-agentic-reasoning-automation-mesh (PARAM itself)
-- TokenEye — LLM usage metrics proxy on localhost:8787
+- TokenEye — LLM usage metrics proxy. Runs in `param-tokeneye` Docker container on `nas_param-net`. Reachable from `param` container at `http://tokeneye:8787` (not localhost). Public dashboard: `https://tokeneye.aiforges.app`
 - game-theory-model
 
 ## Telegram
