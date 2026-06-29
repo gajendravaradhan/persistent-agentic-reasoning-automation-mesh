@@ -8,8 +8,6 @@ ingress:
   service: http://localhost:8644
 - hostname: vault.aiforges.app
   service: http://localhost:8311
-- hostname: vault.param.aiforges.app
-  service: http://localhost:8311
 - hostname: tokeneye.aiforges.app
   service: http://localhost:8788
 - service: http_status:404
