@@ -1,16 +1,15 @@
 tunnel: 225ed34b-3be5-4301-863e-1802552fa082
 credentials-file: /home/nonroot/.cloudflared/225ed34b-3be5-4301-863e-1802552fa082.json
 origin-cert: /home/nonroot/.cloudflared/cert.pem
-
 ingress:
-  - hostname: param.aiforges.app
-    service: http://localhost:9090
-  - hostname: hook.param.aiforges.app
-    service: http://localhost:9090
-  - hostname: vault.aiforges.app
-    service: http://localhost:8311
-  - hostname: vault.param.aiforges.app
-    service: http://localhost:8311
-  - hostname: tokeneye.aiforges.app
-    service: http://localhost:8788
-  - service: http_status:404
+- hostname: param.aiforges.app
+  service: http://localhost:9090
+- hostname: hook.aiforges.app
+  service: http://localhost:8644
+- hostname: vault.aiforges.app
+  service: http://localhost:8311
+- hostname: vault.param.aiforges.app
+  service: http://localhost:8311
+- hostname: tokeneye.aiforges.app
+  service: http://localhost:8788
+- service: http_status:404

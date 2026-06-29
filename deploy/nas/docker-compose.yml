@@ -16,6 +16,7 @@ services:
     networks: [param-net]
     ports:
       - "127.0.0.1:9119:9119"
+      - "127.0.0.1:8644:8644"
     volumes:
       - ./hermes-data:/opt/data
       - ./hermes-data/scripts:/opt/data/scripts
