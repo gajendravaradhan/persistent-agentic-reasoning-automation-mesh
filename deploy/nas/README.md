@@ -134,9 +134,12 @@ Creates a secure tunnel from NAS to Cloudflare. Dashboard available at `https://
 **Tunnel routes:**
 | Hostname | Service | Port |
 |----------|---------|------|
-| `param.aiforges.app` | Hermes Dashboard | 9119 |
-| `api.param.aiforges.app` | API / Health | 9119 |
+| `param.aiforges.app` | PARAM PWA + Hermes Dashboard (nginx) | 9090 |
+| `vault.aiforges.app` | Vaultwarden (Bitwarden-compatible vault) | 8311 |
 | `tokeneye.aiforges.app` | TokenEye Dashboard | 8788 |
+
+> All hostnames behind Cloudflare Access (Zero Trust, email-allow-list gated).
+> `vault.aiforges.app` is the shared vault for all apps on the domain.
 
 ## Commands
 

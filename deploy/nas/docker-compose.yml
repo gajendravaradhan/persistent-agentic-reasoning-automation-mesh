@@ -55,7 +55,7 @@ services:
     restart: unless-stopped
     networks: [param-net]
     ports:
-      - "127.0.0.1:8787:8787"
+      - "0.0.0.0:8787:8787"
     working_dir: /app
     volumes:
       - /home/Nasama-Pochu/param/tokeneye/src:/app/src:ro
@@ -105,7 +105,7 @@ services:
     environment:
       - SIGNUPS_ALLOWED=false
       - WEBSOCKET_ENABLED=true
-      - DOMAIN=https://vault.param.aiforges.app
+      - DOMAIN=https://vault.aiforges.app
       - ROCKET_PORT=8311
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8311/", "-o", "/dev/null"]

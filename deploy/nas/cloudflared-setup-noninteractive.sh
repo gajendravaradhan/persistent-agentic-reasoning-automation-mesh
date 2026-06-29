@@ -52,7 +52,7 @@ ok "Config deployed to $CONFIG_DIR/config.yml"
 
 echo ""
 echo "Setting up DNS routes..."
-for HOSTNAME in "param" "api.param" "tokeneye"; do
+for HOSTNAME in "param" "vault" "tokeneye"; do
     FQDN="${HOSTNAME}.${DOMAIN}"
     cloudflared tunnel route dns "$TUNNEL_NAME" "$FQDN" 2>/dev/null && \
         ok "DNS route: $FQDN" || \
@@ -75,5 +75,5 @@ echo "  cloudflared tunnel run $TUNNEL_NAME"
 echo ""
 echo "Access points:"
 echo "  Dashboard:  https://param.${DOMAIN}"
-echo "  API:        https://api.param.${DOMAIN}"
+echo "  Vault:      https://vault.${DOMAIN}"
 echo "  TokenEye:   https://tokeneye.${DOMAIN}"
